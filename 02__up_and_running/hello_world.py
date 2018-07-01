@@ -7,4 +7,4 @@ hw = h + w
 with tf.Session() as sess:
     ans = sess.run(hw)
 
-print(ans)
+print(ans.decode())
