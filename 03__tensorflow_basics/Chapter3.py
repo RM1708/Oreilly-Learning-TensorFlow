@@ -1,6 +1,9 @@
 
 # coding: utf-8
 
+"""
+This file has been converted from Chapter3.ipynb
+"""
 # In[ ]:
 
 
@@ -111,7 +114,9 @@ print(x.shape)
 print(type(x))
 x = tf.cast(x,tf.int64)
 print(x.dtype)
-print(sess(x))
+sess = tf.InteractiveSession() #RM. Missing in original
+print(sess.run(x))#RM. .run was missing
+sess.close() #RM
 
 
 # ### Tensor arrays and Shapes  
@@ -140,7 +145,12 @@ print("3d Numpy array input: {}".format(c.get_shape()))
 
 
 import matplotlib.pyplot as plt 
+"""
+This bit runs in an ipython console
+
 get_ipython().run_line_magic('matplotlib', 'inline')
+
+"""
 
 sess = tf.InteractiveSession()
 
@@ -314,8 +324,11 @@ with tf.Graph().as_default():
 
 print("outs = {}".format(outs))
 
+print()
 
 # ### Example 1: Linear Regression
+
+print("\nLinear Regression")
 
 # In[23]:
 
@@ -371,6 +384,7 @@ with g.as_default():
 
 # In[25]:
 
+print("\nLogistic Regression")
 
 N = 20000
 

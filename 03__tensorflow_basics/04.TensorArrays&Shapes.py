@@ -26,9 +26,13 @@ print("3d Numpy array input: {}".format(c.get_shape()))
 
 # In[4]:
 
-
 import matplotlib.pyplot as plt 
+"""
+This bit runs in an ipython console
+
 get_ipython().run_line_magic('matplotlib', 'inline')
+
+"""
 
 sess = tf.InteractiveSession()
 
@@ -44,7 +48,6 @@ maxval = 2
 x_uniform = tf.random_uniform((1,50000),minval,maxval).eval()
 
 sess.close()
-
 
 def simpleaxis(ax):
     ax.spines['top'].set_visible(False)
