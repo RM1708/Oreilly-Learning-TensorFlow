@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from layers import conv_layer, max_pool_2x2, full_layer
 
-DATA_PATH = "path/to/CIFAR10"
+DATA_PATH = "/home/rm/tmp/CIFAR10"
 BATCH_SIZE = 50
 STEPS = 500000
 
@@ -38,7 +38,8 @@ def display_cifar(images, size):
 class CifarLoader(object):
     """
     Load and mange the CIFAR dataset.
-    (for any practical use there is no reason not to use the built-in dataset handler instead)
+    (for any practical use there is no reason not to use 
+    the built-in dataset handler instead)
     """
     def __init__(self, source_files):
         self._source = source_files
@@ -69,7 +70,8 @@ class CifarLoader(object):
 
 class CifarDataManager(object):
     def __init__(self):
-        self.train = CifarLoader(["data_batch_{}".format(i) for i in range(1, 6)])\
+        self.train = CifarLoader(["data_batch_{}".format(i) \
+                                  for i in range(1, 6)])\
             .load()
         self.test = CifarLoader(["test_batch"]).load()
 
