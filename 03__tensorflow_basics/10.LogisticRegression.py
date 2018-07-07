@@ -23,14 +23,14 @@ def display_partition(x_values,y_values,assignment_values):
 # In[25]:
 
 
-N = 2000
+N = 200
 SIGMOID_SLOPE_FACTOR = 10.0
 def sigmoid(x):
     return 1 / (1 + np.exp(-x * SIGMOID_SLOPE_FACTOR))
 
 # === Create data and simulate results =====
-x_data = np.random.randn(N,3) #THIS IS THE INPUT DATA
-                            #It is a 3-D vector
+#x_data = np.random.randn(N,3) #THIS IS THE INPUT DATA
+#                            #It is a 3-D vector
 x_data = np.random.randn(N,2) #THIS IS THE INPUT DATA
                             #It is a 2-D vector
 #w_real = [0.3,0.5,0.1]
