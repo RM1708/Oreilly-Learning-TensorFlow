@@ -122,7 +122,7 @@ merged = tf.summary.merge_all()
 
 
 # Get a small test set
-test_data = mnist.test.images[:batch_size].reshape((-1, time_steps, no_of_elements_per_step))
+test_data = mnist.test.images[:batch_size].reshape((-1, time_steps, element_size))
 test_label = mnist.test.labels[:batch_size]
 
 with tf.Session() as sess:
@@ -138,7 +138,7 @@ with tf.Session() as sess:
 
             batch_x, batch_y = mnist.train.next_batch(batch_size)
             # Reshape data to get 28 sequences of 28 pixels
-            batch_x = batch_x.reshape((batch_size, time_steps, no_of_elements_per_step))
+            batch_x = batch_x.reshape((batch_size, time_steps, element_size))
             summary, _ = sess.run([merged, train_step],
                                   feed_dict={_inputs: batch_x, y: batch_y})
             # Add to summaries
