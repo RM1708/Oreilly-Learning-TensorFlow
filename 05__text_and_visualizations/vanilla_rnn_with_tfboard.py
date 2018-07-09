@@ -9,21 +9,21 @@ import tensorflow as tf
 
 # Import MINST data
 from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
+mnist = input_data.read_data_sets("/home/rm/tmp/data/", one_hot=True)
 
 # Define some parameters
-element_size = 28
+no_of_elements_per_step = 28
 time_steps = 28
 num_classes = 10
 batch_size = 128
 hidden_layer_size = 128
 
 # Where to save TensorBoard model summaries
-LOG_DIR = "logs/RNN_with_summaries"
+LOG_DIR = "/home/rm/logs/RNN_with_summaries/"
 
 # Create placeholders for inputs, labels
 _inputs = tf.placeholder(tf.float32,
-                         shape=[None, time_steps, element_size],
+                         shape=[None, time_steps, no_of_elements_per_step],
                          name='inputs')
 y = tf.placeholder(tf.float32, shape=[None, num_classes], name='labels')
 
@@ -45,7 +45,7 @@ def variable_summaries(var):
 # Weights and bias for input and hidden layer
 with tf.name_scope('rnn_weights'):
     with tf.name_scope("W_x"):
-        Wx = tf.Variable(tf.zeros([element_size, hidden_layer_size]))
+        Wx = tf.Variable(tf.zeros([no_of_elements_per_step, hidden_layer_size]))
         variable_summaries(Wx)
     with tf.name_scope("W_h"):
         Wh = tf.Variable(tf.zeros([hidden_layer_size, hidden_layer_size]))
@@ -65,9 +65,9 @@ def rnn_step(previous_hidden_state, x):
 
 
 # Processing inputs to work with scan function
-# Current input shape: (batch_size, time_steps, element_size)
+# Current input shape: (batch_size, time_steps, no_of_elements_per_step)
 processed_input = tf.transpose(_inputs, perm=[1, 0, 2])
-# Current input shape now: (time_steps,batch_size, element_size)
+# Current input shape now: (time_steps,batch_size, no_of_elements_per_step)
 
 
 initial_hidden = tf.zeros([batch_size, hidden_layer_size])
@@ -122,7 +122,7 @@ merged = tf.summary.merge_all()
 
 
 # Get a small test set
-test_data = mnist.test.images[:batch_size].reshape((-1, time_steps, element_size))
+test_data = mnist.test.images[:batch_size].reshape((-1, time_steps, no_of_elements_per_step))
 test_label = mnist.test.labels[:batch_size]
 
 with tf.Session() as sess:
@@ -138,7 +138,7 @@ with tf.Session() as sess:
 
             batch_x, batch_y = mnist.train.next_batch(batch_size)
             # Reshape data to get 28 sequences of 28 pixels
-            batch_x = batch_x.reshape((batch_size, time_steps, element_size))
+            batch_x = batch_x.reshape((batch_size, time_steps, no_of_elements_per_step))
             summary, _ = sess.run([merged, train_step],
                                   feed_dict={_inputs: batch_x, y: batch_y})
             # Add to summaries

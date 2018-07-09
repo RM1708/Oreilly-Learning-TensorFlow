@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from layers import conv_layer, max_pool_2x2, full_layer
 
-DATA_PATH = "/home/rm/tmp/CIFAR10"
+DATA_PATH = "/home/rm/tmp/CIFAR10/"
 BATCH_SIZE = 50
 STEPS = 500000
 
