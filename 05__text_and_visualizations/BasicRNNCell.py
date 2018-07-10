@@ -7,18 +7,23 @@ Created on Tue Dec 20 17:34:43 2016
 from __future__ import print_function
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
+mnist = input_data.read_data_sets("/home/rm/tmp/data/", one_hot=True)
 
-element_size = 28
+no_of_elements_per_step = 28
 time_steps = 28
 num_classes = 10
 batch_size = 128
 hidden_layer_size = 128
 
 _inputs = tf.placeholder(tf.float32,
-                         shape=[None, time_steps, element_size],
+                         shape=[None, time_steps, no_of_elements_per_step],
                          name='inputs')
-y = tf.placeholder(tf.float32, shape=[None, num_classes], name='inputs')
+y = tf.placeholder(tf.float32, shape=[None, num_classes], \
+                       name='inputs') #Typo?
+
+#######################################################
+#NOTE: No name_scopes
+#######################################################
 
 # TensorFlow built-in functions
 rnn_cell = tf.contrib.rnn.BasicRNNCell(hidden_layer_size)
@@ -47,12 +52,12 @@ sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
 
 test_data = mnist.test.images[:batch_size].reshape(
-    (-1, time_steps, element_size))
+    (-1, time_steps, no_of_elements_per_step))
 test_label = mnist.test.labels[:batch_size]
 
 for i in range(3001):
     batch_x, batch_y = mnist.train.next_batch(batch_size)
-    batch_x = batch_x.reshape((batch_size, time_steps, element_size))
+    batch_x = batch_x.reshape((batch_size, time_steps, no_of_elements_per_step))
     sess.run(train_step, feed_dict={_inputs: batch_x,
                                     y: batch_y})
     if i % 1000 == 0:
