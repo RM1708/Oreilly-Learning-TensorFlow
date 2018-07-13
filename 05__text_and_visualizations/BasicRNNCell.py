@@ -21,6 +21,11 @@ _inputs = tf.placeholder(tf.float32,
 y = tf.placeholder(tf.float32, shape=[None, num_classes], \
                        name='inputs') #Typo?
 
+Wl = tf.Variable(tf.truncated_normal([hidden_layer_size, num_classes],
+                                     mean=0, stddev=.01))
+bl = tf.Variable(tf.truncated_normal([num_classes], mean=0, stddev=.01))
+
+
 #######################################################
 #NOTE: No name_scopes
 #######################################################
@@ -29,15 +34,10 @@ y = tf.placeholder(tf.float32, shape=[None, num_classes], \
 rnn_cell = tf.contrib.rnn.BasicRNNCell(hidden_layer_size)
 outputs, _ = tf.nn.dynamic_rnn(rnn_cell, _inputs, dtype=tf.float32)
 
-Wl = tf.Variable(tf.truncated_normal([hidden_layer_size, num_classes],
-                                     mean=0, stddev=.01))
-bl = tf.Variable(tf.truncated_normal([num_classes], mean=0, stddev=.01))
-
-
 def get_linear_layer(vector):
     return tf.matmul(vector, Wl) + bl
 
-
+########################################################
 last_rnn_output = outputs[:, -1, :]
 final_output = get_linear_layer(last_rnn_output)
 
@@ -47,7 +47,7 @@ train_step = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cross_entropy)
 
 correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(final_output, 1))
 accuracy = (tf.reduce_mean(tf.cast(correct_prediction, tf.float32))) * 100
-
+########################################################
 sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
 
