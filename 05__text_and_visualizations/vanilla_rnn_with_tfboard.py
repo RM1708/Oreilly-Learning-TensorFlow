@@ -101,6 +101,10 @@ with tf.name_scope('rnn_weights'):
 # Current input shape: (batch_size, no_of_scanlines_per_image, no_of_elements_per_scanline)
 transposed_input = tf.transpose(_inputs, perm=[1, 0, 2])
 # Current input shape now: (no_of_scanlines_per_image,batch_size, no_of_elements_per_scanline)
+assert_transposed = tf.Assert((no_of_scanlines_per_image + 1 == transposed_input.shape[0] and
+               batch_size == transposed_input.shape[1] and
+               no_of_elements_per_scanline == transposed_input.shape[2]), \
+            [y], name="assert_transposed")
 
 initial_hidden = tf.zeros([batch_size, state_vector_dimensionality])
 
@@ -116,14 +120,36 @@ def rnn_step(previous_hidden_state, x):
 #line-by-line. The vertical axis is along dim = 0 in the transposed
 #input. The scanning presents the sequence of vertical scans. The
 #length of the sequence is therefore no_of_scanlines_per_image 
-#(see assert below). For the selected element of the scan sequence
-#the applicable row of pixels, for the complete batch is presented
-#to rnn_step. Each row is
+#(see assert below). For the selected element of the 
+#scan sequence - the time-step -
+#the applicable row of pixels, for the ***complete *** batch is 
+#presented to rnn_step. 
+#So at each point of the sequence of the vertical scan -
+# - a time-step - the input is a matrix of dimension 
+#[batch_size, no_of_elements_per_scanline]. Each row of the matrix has the
+#pixels for the scan at a particular scan-step for the complete batch.
+#SEE BELOW for assertions on all_hidden_states.
+        
 all_hidden_states = tf.scan(rnn_step,
                             transposed_input,
                             initializer=initial_hidden,
-                            name='ScanProcessedInput') #'states')
+                            name='all_hidden_states') #'states')
 
+def true_fn():
+    return (all_hidden_states)
+
+def false_fn():
+    z = tf.transpose(all_hidden_states,perm=[1,0,2])
+    return (z)
+
+cond_T_all_hidden_states = tf.cond((tf.convert_to_tensor(1 < 2)), \
+                                 true_fn, \
+                                 false_fn, \
+                                 name="cond_T_all_hidden_states")
+cond_F_all_hidden_states = tf.cond((tf.convert_to_tensor(1 < 0)), \
+                                 true_fn, \
+                                 false_fn, \
+                                 name="cond_F_all_hidden_states")
 #########################################################################
 # These we would like to see as bundled together in heirarchies
 # Weights for output layers
@@ -152,7 +178,9 @@ def get_linear_layer(hidden_state):
 #NOTE: The name scope "linear_layer_weights" continues
 with tf.name_scope('linear_layer_weights') as scope:
     # Iterate across time, apply linear layer to all RNN outputs
-    all_outputs = tf.map_fn(get_linear_layer, all_hidden_states,name='FilterOPofAllHiddenStages')
+    all_outputs = tf.map_fn(get_linear_layer, \
+                            all_hidden_states,\
+                            name='FilterOPofAllHiddenStages')
     # Get Last output -- h_28
     output = all_outputs[-1]
     tf.summary.histogram('outputs', output)
@@ -214,7 +242,10 @@ try:
                batch_size == x.shape[1] and
                no_of_elements_per_scanline == x.shape[2])
 
-        
+#        sess.run(assert_transposed, \
+#                 feed_dict={_inputs: batch_x, \
+#                                              y: batch_y})
+
 #        The transposed input - dimensions as asserted above - is 
 #        tf.scan'ed and all_hidden_states built step-by-step. 
 #        
@@ -233,7 +264,8 @@ try:
 #            This also results in [batch_size, state_vector_dimensionality]
 #            
 #            The third term is the bias which is a row vector of
-#            dimension [state_vector_dimensionality]
+#            dimension [state_vector_dimensionality]. This single row is 
+#            "broadcast" to all the batch_size rows of the other two terms
         x = sess.run(b_rnn,
                               feed_dict={_inputs: batch_x, \
                                          y: batch_y})
@@ -253,7 +285,27 @@ try:
                batch_size == x.shape[1] and
                state_vector_dimensionality == x.shape[2])
         
-#        Each hidden layer (of all_hidden_state) is multiplied by 
+#        This checks the True branch of the tf.cond() node.
+#        It returns the tensor, all_hidden_states, 
+#        if the condition holds True
+        x = sess.run(cond_T_all_hidden_states,
+                              feed_dict={_inputs: batch_x, \
+                                         y: batch_y})
+        assert(no_of_scanlines_per_image == x.shape[0] and
+               batch_size == x.shape[1] and
+               state_vector_dimensionality == x.shape[2])
+        
+#        This checks the False branch of the tf.cond() node.
+#        It returns the tensor transpose [1,0,2] of, all_hidden_states, 
+#        if the condition fails
+        x = sess.run(cond_F_all_hidden_states,
+                              feed_dict={_inputs: batch_x, \
+                                         y: batch_y})
+        assert(batch_size == x.shape[0] and
+               no_of_scanlines_per_image == x.shape[1] and
+               state_vector_dimensionality == x.shape[2])
+        
+#        Each hidden layer (of all_hidden_states) is multiplied by 
 #        Wl which has dimension of [state_vector_dimensionality, no_of_classes],
 #        to obtain all_outputs which thus has the dimensions as 
 #        asserted next
@@ -277,7 +329,7 @@ try:
 #        As a precaution clearing any cache, before going to the 
 #        session where the logging is needed. 
 #        tf.summary.FileWriterCache.clear()
-#        assert(False)
+
 except:
     tf.summary.FileWriterCache.clear()
     tf.reset_default_graph()

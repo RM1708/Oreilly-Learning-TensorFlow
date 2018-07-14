@@ -7,30 +7,7 @@ Created on 12Jul2018
 
 import numpy as np
 import tensorflow as tf
-
-
-array_3x3 = np.asarray(
-                    [[1, 2, 3],
-                    [4, 5, 6],
-                    [7, 8, 9]])
-scan_sum = tf.scan(lambda a, x: a + x, array_3x3)
-
-with tf.Session() as sess:
-    print("tf.scan uses lambda function that adds.")
-    print("array_3x3: \n", array_3x3)
-    print("array_3x3.shape: ", \
-          array_3x3.shape)
-    print("\nnp.asarray([array_3x3]).shape: ", \
-          np.asarray([array_3x3]).shape)
-    print("np.asarray([array_3x3]):\n ", \
-          np.asarray([array_3x3]))
-    print("np.asarray([array_3x3[0]]).shape: ", \
-          np.asarray([array_3x3[0]]).shape)
-    print("np.asarray([array_3x3[0]]): ", \
-          np.asarray([array_3x3[0]]))
-    scanned = (sess.run(scan_sum))
-    print("\nscanned: \n", scanned)
-    print("******************************")
+from tensorflow.python import debug as tf_debug
 
 elems_3x3x3x3 = np.asarray([
                         [
@@ -94,8 +71,7 @@ with tf.Session() as sess:
     print("\nelems_3x3x3x3.shape: ", elems_3x3x3x3.shape)
     print("elems_3x3x3x3: \n", elems_3x3x3x3)
     scanned = (sess.run(scan_sum))
-    print("\nscanned by scan_sum using a lambda function that adds: \n", \
-          scanned)
+    print("\nscanned by scan_sum using a lambda function that adds: \n", scanned)
     print("******************************")
 
 
