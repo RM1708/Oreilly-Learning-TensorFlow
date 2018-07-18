@@ -30,8 +30,27 @@ bl = tf.Variable(tf.truncated_normal([num_classes], mean=0, stddev=.01))
 #NOTE: No name_scopes
 #######################################################
 
-# TensorFlow built-in functions
+#TensorFlow’s RNN cells are abstractions that represent the basic operations 
+#each recurrent “cell” carries out ... and its associated state. T
+#hey are, in general terms, a “replacement” of the rnn_step() function 
+#and the associated variables it required. 
+#Of course, there are many variants and types of cells, 
+#each with many methods and properties.
+#
+#(Kindle Locations 2421-2425). O'Reilly Media. Kindle Edition. 
+#
 rnn_cell = tf.contrib.rnn.BasicRNNCell(hidden_layer_size)
+
+#tf.nn.dynamic_rnn replaces tf.scan() in our vanilla implementation 
+#(vanilla_rnn_with_tfboard.py) and creates an RNN specified by rnn_cell.
+#(Kindle Locations 2427-2428). 
+#
+#TensorFlow includes a static and a dynamic function for creating an RNN. 
+#What does this mean? The static version creates an unrolled graph 
+#...   of fixed length. The dynamic version uses a tf.While loop to 
+#dynamically construct the graph at execution time,
+#(Kindle Locations 2429-2432).  
+#
 outputs, _ = tf.nn.dynamic_rnn(rnn_cell, _inputs, dtype=tf.float32)
 
 def get_linear_layer(vector):
@@ -41,7 +60,7 @@ def get_linear_layer(vector):
 last_rnn_output = outputs[:, -1, :]
 final_output = get_linear_layer(last_rnn_output)
 
-softmax = tf.nn.softmax_cross_entropy_with_logits(logits=final_output, labels=y)
+softmax = tf.nn.softmax_cross_entropy_with_logits_v2(logits=final_output, labels=y)
 cross_entropy = tf.reduce_mean(softmax)
 train_step = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cross_entropy)
 

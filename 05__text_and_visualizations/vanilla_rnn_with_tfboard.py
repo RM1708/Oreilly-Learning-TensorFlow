@@ -23,7 +23,34 @@ batch_size = 128
 #(the dimensionality) of the state vector. 
 #The state vector is taken as a row vector. The no of 
 #components of this vector equals no_of_hidden_layers.
-#More appropriate name is state_vector_dimensionality
+#More appropriate name is state_vector_dimensionality.
+#
+#The dimensionality is the number of ***independent*** features that the
+#convolutional layer can detect
+
+#<QUOTE>
+#... in typical CNN models we stack convolutional layers hierarchically, 
+#and feature map is simply a commonly used term referring to the output 
+#of each such layer. Another way to view the output of these layers 
+#is as processed images, the result of applying a filter and perhaps 
+#some other operations. Here, this filter is parameterized by W, the 
+#learned weights of our network representing the convolution filter.
+#</QUOTE>
+#
+#From: "Learning TensorFlow: A Guide to Building Deep Learning Systems" 
+#(Kindle Locations 1378-1382). 
+
+#<QUOTE>
+#This means that all the neurons in the first hidden layer will recognize 
+#the same features, just placed differently in the input image. 
+#For this reason, the map of connections from the input layer to the 
+#hidden feature map ... . Obviously, we need to recognize an image of 
+#more than a map of features, so a complete convolutional layer 
+#is made from multiple feature maps.
+#</QUOTE>
+#
+#From:G"etting Started with TensorFlow 
+#(Kindle Locations 2065-2066). 
 
 #no_of_hidden_layers = 128
 state_vector_dimensionality = 128//2
