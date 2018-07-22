@@ -5,22 +5,25 @@ File is modification of LSTM-supervised_embeddings.py
 What does  this do?
 ------------------
     1. It CLASSIFIES input sentences as odd, or even, or NOTA
+    2. It answers the question raised in LSTM-supervised_embeddings.py, namely:
+        " What if a sentence contains words from both the sets? Should not the test 
+        set have such cases?"
     
 What is a sentence?
 ------------------
     See head of LSTM-supervised_embeddings.py 
-    
-Questions
----------
-    1. 
-        1. What if a sentence contains words from both the sets? Should not the test 
-        set have such cases? 
 
 What do the Tests Prove?
 ------------------------
-        
-TODO
-----
+    1. All valid ODD and EVEN sentences are detected correctly. No false Negatives.
+    2. However, there are false Positives. Some NOTA sentences are detected as ODD or EVEN sentences.
+
+Highlights
+----------
+    1. Use of 
+        1. tf.py_func
+        2. Daisy-chained tf.Print
+        3. tf.metrics_false_positve & tf.metrics_negative
     
 """
 
@@ -47,6 +50,8 @@ digit_to_word_map = {1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five",
                      6: "Six", 7: "Seven", 8: "Eight", 9: "Nine"}
 digit_to_word_map[0] = "PAD"
 
+NUM_OF_RUN_ITERS = 5000
+NUM_OF_TEST_ITERS = 5
 NUM_RANGE = len(digit_to_word_map)
 WORDS_IN_VOCABULARY = len(digit_to_word_map)
 NUM_OF_SENTENCES = 20000
@@ -109,27 +114,31 @@ def main(_):
         Label_ODD = 0 #for odd sentence
         Label_EVEN = 1 #for even sentence
         Label_NOTA = 2 #for NOTA sentence
-        list_of_labels = [Label_EVEN] * (NUM_OF_SENTENCES//2) + \
+        list_of_labels_ = [Label_EVEN] * (NUM_OF_SENTENCES//2) + \
                             [Label_ODD] * (NUM_OF_SENTENCES//2) + \
                             [Label_NOTA] * (NUM_OF_SENTENCES//2) 
         
         ##################################################################
         #PRE_PROCESS the sentences
-                            
-        for i in range(len(list_of_labels)):
-            label = list_of_labels[i]
-            assert(Label_ODD == label or
-                   Label_EVEN == label or
-                   Label_NOTA == label)
-            one_hot_encoding = [0]*NUM_OF_CLASSES
-            one_hot_encoding[label] = 1 
-            if(Label_ODD ==label):
-                assert([1, 0, 0] == one_hot_encoding)
-            elif(Label_EVEN == label):
-                assert([0, 1, 0] == one_hot_encoding)
-            else:
-                assert([0, 0, 1] == one_hot_encoding)
-            list_of_labels[i] = one_hot_encoding
+        def labels_to_one_hot(list_of_labels):
+            list_of_one_hot_labels = [[0, 0, 0]] * len(list_of_labels)
+            for i in range(len(list_of_labels)):
+                label = list_of_labels[i]
+                assert(Label_ODD == label or
+                       Label_EVEN == label or
+                       Label_NOTA == label)
+                one_hot_encoding = [0]*NUM_OF_CLASSES
+                one_hot_encoding[label] = 1 
+                if(Label_ODD ==label):
+                    assert([1, 0, 0] == one_hot_encoding)
+                elif(Label_EVEN == label):
+                    assert([0, 1, 0] == one_hot_encoding)
+                else:
+                    assert([0, 0, 1] == one_hot_encoding)
+                list_of_one_hot_labels[i] = one_hot_encoding
+            return list_of_one_hot_labels
+                    
+        list_of_one_hot_labels = labels_to_one_hot(list_of_labels_)
         
         word2index_map = {} #NOTE: This is going to be a dictionary
         number_of_distinct_words_found = 0 
@@ -157,9 +166,9 @@ def main(_):
         np.random.shuffle(list_of_indices) # This is now the permuted indices
         
         #now permute the list_of_sentences and apply the same permutation 
-        #to list_of_labels and list_of_sentence_lens
+        #to list_of_one_hot_labels and list_of_sentence_lens
         array_of_sentences = np.array(list_of_sentences)[list_of_indices]
-        array_of_labels = np.array(list_of_labels)[list_of_indices]
+        array_of_labels = np.array(list_of_one_hot_labels)[list_of_indices]
         array_of_sentence_lengths = np.array(list_of_sentence_lens)[list_of_indices]
         
         #split the shuffled sentences, equally, into training and testing data
@@ -171,7 +180,7 @@ def main(_):
         test_y = array_of_labels[NUM_OF_SENTENCES//2:]
         test_sentence_lens = array_of_sentence_lengths[NUM_OF_SENTENCES//2:]
         #############################################################
-        #Utility to be used to get batches of the generated sentences
+        #UTILTY to be used to get batches of the generated sentences
         #The input is 
             #a list of sentences as an array and 
             #the corresponding array of labels for the sentences
@@ -206,7 +215,7 @@ def main(_):
             return x, y, array_of_sentence_lengths
         
         #################################################################
-        #Construct TensorFlow Graph
+        #CONSTRUCT TensorFlow Graph
             
         _inputs = tf.placeholder(tf.int32, shape=[batch_size, times_steps])
         _labels = tf.placeholder(tf.float32, shape=[batch_size, NUM_OF_CLASSES])
@@ -253,9 +262,103 @@ def main(_):
                                       tf.argmax(final_output, 1))
         accuracy = (tf.reduce_mean(tf.cast(correct_prediction,
                                            tf.float32)))*100
+        ######################################################################
+        #PRINT nodes.
+        #NOTE: The nodes are Daisy-Chained 
+        #Presently the tensor that can be printed and the string that can be prefixed
+        #has been blanked out. 
+        #NOTE: Known issue: tf.Print does not print to the spyder console. 
+        #Run this file in IPython from the terminal 
+        #                              
+        final_output_print_0 = tf.Print(final_output, \
+                                      [], \
+#                                      [tf.shape(final_output)], \
+                                      message=None)
+#                                      message="final_output shape: ")
         
+        final_output_print_1 = tf.Print(final_output_print_0, \
+                                      [], \
+#                                      [final_output[0]], \
+                                      message=None)
+#                                      message="final_output[0]: ")
+        
+        final_output_print_2 = tf.Print(final_output_print_1, \
+                                      [], \
+#                                      [np.asarray(tf.argmax(final_output, 1)).tolist()], \
+                                      message=None)
+#                                      message="final_output argmax as list: ")
+        
+        final_output_print_3 = tf.Print(final_output_print_2, \
+                                      [], \
+#                                      [np.asarray(tf.argmax(final_output, 1)).tolist()[:5]], \
+                                      message=None)
+#                                      message="final_output argmax 1st Five: ")
+        
+        final_output_print = tf.Print(final_output_print_3, \
+                                      [], \
+#                                      [tf.argmax(final_output, 1)], \
+                                      message=None)
+#                                      message="final_output argmax: ")
+        
+        ######################################################################
+        #Use TensorFlow to collect metrics about false +ves and false -ves
+        #First using tf.argmax(). This does not appear to give correct results.
+        #That is not surprising. argmax returns the index so it could be 0, or
+        #1, or 2. tf.metrics.false_* transforms the values to bool - check the
+        #documentation.
+        metric_false_neg_using_argmax = tf.metrics.false_negatives(
+                                                    tf.argmax(_labels, 1),
+                                                    tf.argmax(final_output_print, 1))
+        metric_false_pos_using_argmax = tf.metrics.false_positives(
+                                                    tf.argmax(_labels, 1),
+                                                    tf.argmax(final_output_print, 1))
+
+        #Now using one_hot coding of the labels. This appears to give correct results.
+        #In this case the labels are represented as a list of three elements. 
+        #Only one of the elements is a 1. The others are 0. The actual label 
+        #value is the index at which the 1 occurs. Thus when tf.metrics_false_*
+        #transforms the labels and predictions to bool, nothing changes.
+        final_output_one_hot = tf.py_func(labels_to_one_hot, \
+                   [tf.argmax(final_output_print, 1)], \
+#                   The folowing two also work
+#                   [(tf.argmax(final_output_print, 1))[:batch_size]], \
+#                   [np.asarray(tf.argmax(final_output_print, 1)).tolist()[:batch_size]], \
+                   (
+#                   #THIS IS VERY INELEGANT. There *** has *** to be a better way
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64,
+                           tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64, tf.int64
+                    ))
+        final_output_one_hot_print_0 = tf.Print(final_output_one_hot, \
+                                      [], \
+                                      message="")
+#                                      [tf.shape(final_output_one_hot)], \
+#                                      message="final_output_one_hot shape: ")
+        
+        metric_false_pos_using_1hot = \
+            tf.metrics.false_positives(_labels[:batch_size],
+                                      final_output_one_hot_print_0)
+        metric_false_neg_using_1hot = \
+            tf.metrics.false_positives(_labels[:batch_size],
+                                      final_output_one_hot_print_0)
+#############################################################################
+#OPERATE the Graph
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
+            sess.run(tf.local_variables_initializer())
             if FLAGS.debug:
                 sess = tf_debug.LocalCLIDebugWrapperSession(sess, \
                                                           ui_type=FLAGS.ui_type)
@@ -277,7 +380,7 @@ def main(_):
                     WORDS_IN_A_SENTENCE, \
                     embedding_space_dimensionality) == word_embeddings.shape)
 
-            for step in range(500):
+            for step in range(NUM_OF_RUN_ITERS):
                 x_batch, y_batch, seqlen_batch = get_sentence_batch(batch_size,
                                                                     train_x, train_y,
                                                                     train_sentence_lens)
@@ -290,19 +393,27 @@ def main(_):
                                                         _sentence_lens: seqlen_batch})
                     print("Accuracy at %d: %.5f" % (step, acc))
         
-            for test_batch in range(5):
+###############################################################################
+#TEST how good was the learning
+            for test_batch in range(NUM_OF_TEST_ITERS):
+                sess.run(tf.local_variables_initializer())
                 x_test, y_test, seqlen_test = get_sentence_batch(batch_size,
                                                                  test_x, test_y,
                                                                  test_sentence_lens)
-                labels_pred, batch_acc = sess.run([tf.argmax(final_output, 1), accuracy],
+                assert((batch_size, NUM_OF_CLASSES) == np.asarray(y_test).shape)
+                
+                labels_pred_, batch_acc = sess.run([final_output, accuracy],
                                                  feed_dict={_inputs: x_test,
                                                             _labels: y_test,
                                                             _sentence_lens: seqlen_test})
+                
+                assert((batch_size, NUM_OF_CLASSES) == labels_pred_.shape)
                 print("\nTest batch accuracy %d: %.5f" % (test_batch, batch_acc))
 
-#                print("Predicted Labels:\n", labels_pred)
-#                print("Actual Labels:\n", np.argmax(y_test, 1))
-                
+                ###################################################################
+                #METRICS using python codeand values returned by sess.run()
+                #
+                labels_pred = np.argmax(labels_pred_, 1)
                 labels_expected =  np.argmax(y_test, 1)
                 list_of_error_tuples = []
                 list_of_misclassified_sentences = []
@@ -333,6 +444,33 @@ def main(_):
                         num_of_NOTAs_found +=1
                 print("No Of NOTAs Present: {}; Found: {}".format(num_of_NOTAs, \
                                                           num_of_NOTAs_found))
+
+                ###################################################################
+                #METRICS using tf.metrics
+                metrics_false_neg  = \
+                    sess.run([metric_false_neg_using_argmax], feed_dict={_inputs: x_test,
+                                                                    _labels: y_test,
+                                                                    _sentence_lens: seqlen_test})
+                print("metric_false_neg_using_argmax: ", metrics_false_neg[0])
+                
+                metrics_false_pos = \
+                    sess.run([metric_false_pos_using_argmax], feed_dict={_inputs: x_test,
+                                                                    _labels: y_test,
+                                                                    _sentence_lens: seqlen_test})
+                print("metric_false_pos_using_argmax: ", metrics_false_pos[0])
+                
+                metrics_false_pos_ = \
+                    sess.run([metric_false_pos_using_1hot], feed_dict={_inputs: x_test,
+                                                                    _labels: y_test,
+                                                                    _sentence_lens: seqlen_test})
+                print("metric_false_pos_using_1hot: ", metrics_false_pos_[0])
+                
+                metrics_false_neg_ = \
+                    sess.run([metric_false_neg_using_1hot], feed_dict={_inputs: x_test,
+                                                                    _labels: y_test,
+                                                                    _sentence_lens: seqlen_test})
+                print("metric_false_neg_using_1hot: ", metrics_false_neg_[0])
+                ###################################################################
                 
             final_output_example = sess.run([final_output], feed_dict={_inputs: x_test,
                                                             _labels: y_test,
