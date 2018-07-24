@@ -3,10 +3,13 @@
 Created on Tue Dec 20 17:34:43 2016
 
 @author: tomhope
+
+RM:
+    1. Explanatory notes and comments.
+    2. Purpose_indicator naming
 """
-from __future__ import print_function
+#from __future__ import print_function
 import tensorflow as tf
-import numpy as np
 
 # Import MNIST data
 from tensorflow.examples.tutorials.mnist import input_data
@@ -17,6 +20,9 @@ no_of_elements_per_scanline = 28
 no_of_scanlines_per_image = 28
 no_of_classes = 10
 batch_size = 128
+
+NUM_OF_TRG_ITERS = 3000
+CHECK_EVERY_ITER_NUM = 100
 
 #no_of_hidden_layers is a misnomer. 
 #The number gives the number of dimensions 
@@ -33,9 +39,9 @@ batch_size = 128
 #and feature map is simply a commonly used term referring to the output 
 #of each such layer. Another way to view the output of these layers 
 #is as processed images, the result of applying a filter and perhaps 
-#some other operations. Here, this filter is parameterized by W, the 
+#some other operations. Here, ***this filter*** is parameterized by W, the 
 #learned weights of our network representing the convolution filter.
-#</QUOTE>
+#</QUOTE> (emphasis mine)
 #
 #From: "Learning TensorFlow: A Guide to Building Deep Learning Systems" 
 #(Kindle Locations 1378-1382). 
@@ -45,8 +51,8 @@ batch_size = 128
 #the same features, just placed differently in the input image. 
 #For this reason, the map of connections from the input layer to the 
 #hidden feature map ... . Obviously, we need to recognize an image of 
-#more than a map of features, so a complete convolutional layer 
-#is made from multiple feature maps.
+#more than a map of features, so *** a *** complete convolutional layer 
+#is made from *** multiple *** feature maps.
 #</QUOTE>
 #
 #From:G"etting Started with TensorFlow 
@@ -59,12 +65,12 @@ state_vector_dimensionality = 128//2
 LOG_DIR = "/home/rm/logs/RNN_with_summaries/"
 
 # Create placeholders for inputs, labels
-_inputs = tf.placeholder(tf.float32,
+_input_images = tf.placeholder(tf.float32,
                          shape=[None, \
                                 no_of_scanlines_per_image, \
                                 no_of_elements_per_scanline],
                          name='inputs')
-y = tf.placeholder(tf.float32, shape=[None, \
+labels_true = tf.placeholder(tf.float32, shape=[None, \
                                       no_of_classes], \
                                 name='labels')
 
@@ -126,14 +132,9 @@ with tf.name_scope('rnn_weights'):
 #NOTE: No scoping here
 # Processing inputs to work with scan function
 # Current input shape: (batch_size, no_of_scanlines_per_image, no_of_elements_per_scanline)
-transposed_input = tf.transpose(_inputs, perm=[1, 0, 2])
-# Current input shape now: (no_of_scanlines_per_image,batch_size, no_of_elements_per_scanline)
-assert_transposed = tf.Assert((no_of_scanlines_per_image + 1 == transposed_input.shape[0] and
-               batch_size == transposed_input.shape[1] and
-               no_of_elements_per_scanline == transposed_input.shape[2]), \
-            [y], name="assert_transposed")
-
-initial_hidden = tf.zeros([batch_size, state_vector_dimensionality])
+transposed_input = tf.transpose(_input_images, perm=[1, 0, 2])
+initial_hidden_state = tf.zeros([batch_size, \
+                                 state_vector_dimensionality])
 
 def rnn_step(previous_hidden_state, x):
         current_hidden_state = tf.tanh(
@@ -159,24 +160,8 @@ def rnn_step(previous_hidden_state, x):
         
 all_hidden_states = tf.scan(rnn_step,
                             transposed_input,
-                            initializer=initial_hidden,
+                            initializer=initial_hidden_state,
                             name='all_hidden_states') #'states')
-
-def true_fn():
-    return (all_hidden_states)
-
-def false_fn():
-    z = tf.transpose(all_hidden_states,perm=[1,0,2])
-    return (z)
-
-cond_T_all_hidden_states = tf.cond((tf.convert_to_tensor(1 < 2)), \
-                                 true_fn, \
-                                 false_fn, \
-                                 name="cond_T_all_hidden_states")
-cond_F_all_hidden_states = tf.cond((tf.convert_to_tensor(1 < 0)), \
-                                 true_fn, \
-                                 false_fn, \
-                                 name="cond_F_all_hidden_states")
 #########################################################################
 # These we would like to see as bundled together in heirarchies
 # Weights for output layers
@@ -215,7 +200,7 @@ with tf.name_scope('linear_layer_weights') as scope:
 with tf.name_scope('cross_entropy'):
     cross_entropy = tf.reduce_mean(\
                        tf.nn.softmax_cross_entropy_with_logits_v2(\
-                                               logits=output, labels=y))
+                                               logits=output, labels=labels_true))
     tf.summary.scalar('cross_entropy', cross_entropy)
 
 with tf.name_scope('train'):
@@ -223,7 +208,7 @@ with tf.name_scope('train'):
     train_step = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cross_entropy)
 
 with tf.name_scope('accuracy'):
-    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(output, 1))
+    correct_prediction = tf.equal(tf.argmax(labels_true, 1), tf.argmax(output, 1))
 
     accuracy = (tf.reduce_mean(tf.cast(correct_prediction, tf.float32)))*100
     tf.summary.scalar('accuracy', accuracy)
@@ -233,136 +218,13 @@ with tf.name_scope('accuracy'):
 ##########################################################################
 # Merge all the summaries
 merged = tf.summary.merge_all()
-
-try:
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-
-        pixel_val = 1.0E+04
-        batch_x, batch_y = mnist.train.next_batch(batch_size)
-        assert(batch_size == batch_x.shape[0] and
-               (no_of_scanlines_per_image * \
-               no_of_elements_per_scanline) == batch_x.shape[1])
-        assert(batch_size == batch_y.shape[0] and
-               no_of_classes == batch_y.shape[1])
-        
-        batch0_pixel0_row1 = batch_x[0, no_of_elements_per_scanline]
-        print("batch0_pixel0_row1: ", batch0_pixel0_row1)
-        batch_x[0, no_of_elements_per_scanline] = pixel_val
-        assert(pixel_val == batch_x[0, no_of_elements_per_scanline])
-        # Reshape data to get 28 sequences of 28 pixels
-        batch_x = batch_x.reshape(batch_size, \
-                                   no_of_scanlines_per_image, \
-                                   no_of_elements_per_scanline)
-        assert(batch_size == batch_x.shape[0] and
-               no_of_scanlines_per_image == batch_x.shape[1] and
-               no_of_elements_per_scanline == batch_x.shape[2])
-
-        pixel_no = 0; scanline_no = 1
-        print("batch0_pixel0_row1: ", batch_x[0, scanline_no, pixel_no])
-        assert(pixel_val == batch_x[0, scanline_no, pixel_no])
-
-        x = sess.run(transposed_input,
-                              feed_dict={_inputs: batch_x, \
-                                         y: batch_y})
-        assert(no_of_scanlines_per_image == x.shape[0] and
-               batch_size == x.shape[1] and
-               no_of_elements_per_scanline == x.shape[2])
-
-#        sess.run(assert_transposed, \
-#                 feed_dict={_inputs: batch_x, \
-#                                              y: batch_y})
-
-#        The transposed input - dimensions as asserted above - is 
-#        tf.scan'ed and all_hidden_states built step-by-step. 
-#        
-#        At each step 
-#            the hidden state at the previous step is multiplied by Wh. 
-#            Wh has dimensions of [state_vector_dimensionality, state_vector_dimensionality])). 
-#            
-#            The first step uses a previous hidden state initialized as 
-#            zeros[batch_size, state_vector_dimensionality]). The result is 
-#            [batch_size, state_vector_dimensionality]
-#            
-#            The scanned input (from tf.scan) has dimension of 
-#            [batch_size, no_of_elements_per_scanline]. This is multiplied 
-#            by Wx which has a dimension
-#            [no_of_elements_per_scanline, state_vector_dimensionality]
-#            This also results in [batch_size, state_vector_dimensionality]
-#            
-#            The third term is the bias which is a row vector of
-#            dimension [state_vector_dimensionality]. This single row is 
-#            "broadcast" to all the batch_size rows of the other two terms
-        x = sess.run(b_rnn,
-                              feed_dict={_inputs: batch_x, \
-                                         y: batch_y})
-        assert(1 == np.asmatrix(x).shape[0] and
-               state_vector_dimensionality == np.asmatrix(x).shape[1])
-
-#        
-#        The number of times that the input is scanned equals 
-#        transposed_input[0] i.e. no_of_scanlines_per_image. 
-#        Therefore, all_hidden_states[0] is no_of_scanlines_per_image 
-#        as asserted below
- 
-        x = sess.run(all_hidden_states,
-                              feed_dict={_inputs: batch_x, \
-                                         y: batch_y})
-        assert(no_of_scanlines_per_image == x.shape[0] and
-               batch_size == x.shape[1] and
-               state_vector_dimensionality == x.shape[2])
-        
-#        This checks the True branch of the tf.cond() node.
-#        It returns the tensor, all_hidden_states, 
-#        if the condition holds True
-        x = sess.run(cond_T_all_hidden_states,
-                              feed_dict={_inputs: batch_x, \
-                                         y: batch_y})
-        assert(no_of_scanlines_per_image == x.shape[0] and
-               batch_size == x.shape[1] and
-               state_vector_dimensionality == x.shape[2])
-        
-#        This checks the False branch of the tf.cond() node.
-#        It returns the tensor transpose [1,0,2] of, all_hidden_states, 
-#        if the condition fails
-        x = sess.run(cond_F_all_hidden_states,
-                              feed_dict={_inputs: batch_x, \
-                                         y: batch_y})
-        assert(batch_size == x.shape[0] and
-               no_of_scanlines_per_image == x.shape[1] and
-               state_vector_dimensionality == x.shape[2])
-        
-#        Each hidden layer (of all_hidden_states) is multiplied by 
-#        Wl which has dimension of [state_vector_dimensionality, no_of_classes],
-#        to obtain all_outputs which thus has the dimensions as 
-#        asserted next
-        
-        x = sess.run(all_outputs,
-                              feed_dict={_inputs: batch_x, \
-                                         y: batch_y})
-        assert(no_of_scanlines_per_image == x.shape[0] and
-               batch_size == x.shape[1] and
-               no_of_classes == x.shape[2])
-
-        x = sess.run(output,
-                              feed_dict={_inputs: batch_x, \
-                                         y: batch_y})
-        assert(batch_size == x.shape[0] and
-               no_of_classes == x.shape[1])
-
-#        Will running the graph nodes also start the process of
-#        logging? No file writer object hass been created, as done
-#        for the session below. Needs to be checked.
-#        As a precaution clearing any cache, before going to the 
-#        session where the logging is needed. 
-#        tf.summary.FileWriterCache.clear()
-
-except:
-    tf.summary.FileWriterCache.clear()
-    tf.reset_default_graph()
-    print("\nException in the bunch of assertions.")
-    raise
-    
+##########################################################################
+#Re-factored out the bunch of assertions of my understanding of the code.
+#Refactored to tf.Assert.py
+##########################################################################
+#In case code is inserted above that reads batches from the data file,
+#the counts will need to be reset so that training can process from 
+#the start of the file    
     
 mnist.train.reset_counts()
 
@@ -381,8 +243,8 @@ try:
                                             graph=tf.get_default_graph())
     
         sess.run(tf.global_variables_initializer())
-    
-        for i in range(10000):
+
+        for i in range(NUM_OF_TRG_ITERS):
     
                 batch_x, batch_y = mnist.train.next_batch(batch_size)
                 # Reshape data to get 28 sequences of 28 pixels
@@ -390,33 +252,33 @@ try:
                                            no_of_scanlines_per_image, \
                                            no_of_elements_per_scanline))
                 summary, _ = sess.run([merged, train_step],
-                                      feed_dict={_inputs: batch_x, \
-                                                 y: batch_y})
+                                      feed_dict={_input_images: batch_x, \
+                                                 labels_true: batch_y})
                 # Add to summaries
                 train_writer.add_summary(summary, i)
     
-                if i % 1000 == 0:
+                if i % CHECK_EVERY_ITER_NUM == 0:
                     acc, loss, = sess.run([accuracy, cross_entropy],
-                                          feed_dict={_inputs: batch_x,
-                                                     y: batch_y})
+                                          feed_dict={_input_images: batch_x,
+                                                     labels_true: batch_y})
                     print("Iter " + str(i) + ", Minibatch Loss= " +
                           "{:.6f}".format(loss) + ", Training Accuracy= " +
                           "{:.5f}".format(acc))
-                if i % 100 == 0:
+                if i % CHECK_EVERY_ITER_NUM == 0:
                     # Calculate accuracy for 128 mnist test images and
                     # add to summaries
                     summary, acc = sess.run([merged, accuracy],
-                                            feed_dict={_inputs: test_data,
-                                                       y: test_label})
+                                            feed_dict={_input_images: test_data,
+                                                       labels_true: test_label})
                     test_writer.add_summary(summary, i)
     
-        test_acc = sess.run(accuracy, feed_dict={_inputs: test_data,
-                                                 y: test_label})
+        test_acc = sess.run(accuracy, feed_dict={_input_images: test_data,
+                                                 labels_true: test_label})
         print("Test Accuracy:", test_acc)
     
 finally:
     #This is needed only when the file is run in spyder.
     #A re-run will cause an exception.
     #If run from the command line there is no problem
-    print("Exiting from finally.")
+    print("Exiting from finally in: ", __file__)
     tf.reset_default_graph()
