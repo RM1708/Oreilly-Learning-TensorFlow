@@ -95,7 +95,6 @@ from tensorflow.python import debug as tf_debug
 
 WORDS_IN_A_SENTENCE = 6
 
-USE_3point_MAP = False 
 NUM_OF_CLASSES = 2 #There are just two Classes ODD Sentences and EVEN Sentences
 
 num_LSTM_layers = 2               
@@ -108,7 +107,16 @@ BATCH_SIZE = 128
 #64 for embedding?
 embedding_space_dimensionality = 64
 hidden_layer_size = 32
-times_steps = WORDS_IN_A_SENTENCE #6 #TODO: Is this connected to WORDS_IN_A_SENTENCE?
+
+times_steps = WORDS_IN_A_SENTENCE #6 #TODO: 
+#Is this connected to WORDS_IN_A_SENTENCE? Yes it is. 
+#Comparing with the example of row-wise (col-wise) scan of an image: 
+    #1. Each word corresponds to a single scan line -row or col. 
+    #2. The number of the words corresponds to the number
+    # of scan-lines used in scanning the image. 
+    #3. The time to scan one row (col) is a time-step.
+    #4. There are as many time-steps as there are scan-lines.
+    #5. Thus time_steps correspond to WORDS_IN_A_SENTENCE
 
 ##############################################################
 #GENERATE simulated text sentences
@@ -280,29 +288,110 @@ def main(_):
             return x, y, array_of_sentence_lengths
         
         #################################################################
+        #The criteria for classifying, whether a sentence is Odd or Even: 
+        #if it consists, apart from PAD words, solely of Even words, then
+        #it is an Even sentence.
+        #if it consists, apart from PAD words, solely of Odd words, then
+        #it is an Odd sentence.
+        #If it has both Even and Odd words, then it is invalid
+        #
+        #Therefore if the Odd words are mapped onto one vector, the Even worda
+        #onto another, and the PAD word onto a third, then the performnce
+        #should not suffer.
+        #
+        #Unfortunately with the embedding table given below, the performance 
+        #is very poor
+#        embeddings_3point = \
+#            np.asarray([
+#                        [0.0] * embedding_space_dimensionality,
+#                        [-75.0] * embedding_space_dimensionality,
+#                        [+75.0] * embedding_space_dimensionality,
+#                        [-75.0] * embedding_space_dimensionality,
+#                        [+75.0] * embedding_space_dimensionality,
+#                        [-75.0] * embedding_space_dimensionality,
+#                        [+75.0] * embedding_space_dimensionality,
+#                        [-75.0] * embedding_space_dimensionality,
+#                        [+75.0] * embedding_space_dimensionality,
+#                        [-75.0] * embedding_space_dimensionality,
+#                        ]) #The odd ids are mapped to -75.0 
+                            #Even ids are mapped to +75.0
+                            #PAD is mapped to 0.0
+        ##############################################################
+        #Again the word_ids are mapped to 3 distinct vectors.
+        #In this case the components of the vectors are random.
+        #The performance appears to be just as good as when all unique words
+        #have differing vectors
+#                Accuracy at 0: 50.78125
+#                Accuracy at 100: 51.56250
+#                Accuracy at 200: 100.00000
+#                Accuracy at 300: 100.00000
+#                Accuracy at 400: 100.00000
+#                Test batch accuracy 0: 100.00000
+#                Test batch accuracy 1: 100.00000
+#                Test batch accuracy 2: 100.00000
+#                Test batch accuracy 3: 100.00000
+#                Test batch accuracy 4: 100.00000  
+        
+        #With the full embedding table it is
+#                Accuracy at 0: 51.56250
+#                Accuracy at 100: 100.00000
+#                Accuracy at 200: 100.00000
+#                Accuracy at 300: 100.00000
+#                Accuracy at 400: 100.00000
+#                Test batch accuracy 0: 100.00000
+#                Test batch accuracy 1: 100.00000
+#                Test batch accuracy 2: 100.00000
+#                Test batch accuracy 3: 100.00000
+#                Test batch accuracy 4: 100.00000
+        random_nums = (np.random.uniform(-1, 1, embedding_space_dimensionality))
+        embeddings_3point = \
+            np.asarray([
+                random_nums *  0.0,
+                random_nums * -1.0,
+                random_nums * +1.0,
+                random_nums * -1.0,
+                random_nums * +1.0,
+                random_nums * -1.0,
+                random_nums * +1.0,
+                random_nums * -1.0,
+                random_nums * +1.0,
+                random_nums * -1.0
+                    ])
+        #assert that there are just 3 distinct points
+        #in the embedding table
+        assert(embeddings_3point[1].tolist() == \
+               embeddings_3point[3].tolist())
+        assert(embeddings_3point[1].tolist() == \
+               embeddings_3point[5].tolist())
+        assert(embeddings_3point[1].tolist() == \
+               embeddings_3point[7].tolist())
+        assert(embeddings_3point[1].tolist() == \
+               embeddings_3point[9].tolist())
+        
+        assert(not(embeddings_3point[0].tolist() == \
+               embeddings_3point[2].tolist()))
+        assert(not(embeddings_3point[1].tolist() == \
+               embeddings_3point[2].tolist()))
+        
+        assert(embeddings_3point[2].tolist() == \
+               embeddings_3point[4].tolist())
+        assert(embeddings_3point[2].tolist() == \
+               embeddings_3point[2].tolist())
+        assert(embeddings_3point[2].tolist() == \
+               embeddings_3point[8].tolist())
+        #################################################################
         #Construct TensorFlow Graph
             
-        _inputs = tf.placeholder(tf.int32, shape=[BATCH_SIZE, times_steps])
+#        _inputs = tf.placeholder(tf.int32, shape=[BATCH_SIZE, WORDS_IN_A_SENTENCE])
+        _inputs = tf.placeholder(tf.int32, shape=[None, WORDS_IN_A_SENTENCE])
         _labels = tf.placeholder(tf.float32, shape=[BATCH_SIZE, NUM_OF_CLASSES])
         _sentence_lens = tf.placeholder(tf.int32, shape=[BATCH_SIZE])
         
-        embeddings_3point = \
-            np.asarray([
-                        [0.0] * embedding_space_dimensionality,
-                        [-75.0] * embedding_space_dimensionality,
-                        [+75.0] * embedding_space_dimensionality,
-                        [-75.0] * embedding_space_dimensionality,
-                        [+75.0] * embedding_space_dimensionality,
-                        [-75.0] * embedding_space_dimensionality,
-                        [+75.0] * embedding_space_dimensionality,
-                        [-75.0] * embedding_space_dimensionality,
-                        [+75.0] * embedding_space_dimensionality,
-                        [-75.0] * embedding_space_dimensionality,
-                        ]) #The odd ids are mapped to -75.0 
-                            #Even ids are mapped to +75.0
-                            #PAD is mapped to 0.0
 
         with tf.name_scope("embeddings"):
+
+            USE_3point_MAP = False 
+            
             if(False == USE_3point_MAP):
                 embeddings = tf.Variable(
                     tf.random_uniform([number_of_distinct_words_found,
@@ -310,7 +399,89 @@ def main(_):
                                       -1.0, 1.0), name='embedding')
             else:
                 embeddings =tf.Variable(embeddings_3point, dtype=tf.float32)
+            ###########################################################
+            #EMBED the input into the embeddings space
+            #SANITY CHECKS
+            sess = tf.InteractiveSession()
+            sess.run(tf.global_variables_initializer())
+            assert(number_of_distinct_words_found == \
+                   len(embeddings.eval()))
+            assert(number_of_distinct_words_found == \
+                   (np.asarray(embeddings.eval())).shape[0])
+            assert(embedding_space_dimensionality == \
+                   (np.asarray(embeddings.eval())).shape[1])
+            sess.close()
+            
             embed = tf.nn.embedding_lookup(embeddings, _inputs)
+            #Copy of assertion on embed in main session below
+#            assert((BATCH_SIZE, \
+#                    WORDS_IN_A_SENTENCE, \
+#                    embedding_space_dimensionality) == word_embeddings.shape)
+#            Each word in the sentence is looked up in the table_of_embeddings.
+#            This maps each unique word_id to a random point having dimensionality
+#            of embedding_space_dimensionality
+            sess = tf.InteractiveSession()
+            sess.run(tf.global_variables_initializer())
+            Test_Sentences_0 = \
+                        [\
+                             [0, 1, 2, 3, 4, 5],
+                             [0, 1, 2, 3, 4, 5],
+                             [0, 1, 2, 3, 4, 5]
+                         ]
+
+            word_embeddings = sess.run([embed], \
+                                    feed_dict={_inputs: Test_Sentences_0})
+            assert(4 == np.asarray(word_embeddings).ndim)
+            #The embeddings of all the sentences are put in 1 list.
+            assert(1 == len(word_embeddings))
+            #Three sentences were fed. So the top level list has three elements
+            assert(3 == len(word_embeddings[0]))
+            #For each word_id in a sentence, there is a vector to which it is mapped
+            assert(WORDS_IN_A_SENTENCE == len(word_embeddings[0][0]))
+            #The dimensionality of the vector to which a word is mapped is
+            #embedding_space_dimensionality
+            assert(embedding_space_dimensionality == len(word_embeddings[0][0][0]))
+            #The following asserts show that for the 3 identical sentences
+            #used, identical embeddings (of shape [WORDS_IN_A_SENTENCE, 
+            # embedding_space_dimensionality]) are returned .
+            #
+            #HENCE, it is safe to conclude that for a given unique word_id the same vector is 
+            #returned, irrespective of different occurencess
+            assert(word_embeddings[0][0].tolist() == \
+                   word_embeddings[0][1].tolist())
+            assert(word_embeddings[0][0].tolist() == \
+                   word_embeddings[0][2].tolist())
+
+            #WHAT-IF the number of unique words exceeds the rows in the
+            #embedding table?
+#            Attempt to run the following (with necessary changes to placeholder for
+#            _inputs, and commenting out the earlier asserts, results in:
+#            InvalidArgumentError (see above for traceback): 
+#                indices[0,10] = 10 is not in [0, 10)
+#            Test_Sentences_0 = \
+#                        [\
+#                             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+#                             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+#                             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+#                         ]
+#
+#            word_embeddings = sess.run([embed], \
+#                                    feed_dict={_inputs: Test_Sentences_0})
+            
+#            QUESTION
+#            See https://www.tensorflow.org/api_docs/python/tf/nn/embedding_lookup
+#            It says
+#            "If len(params) > 1, each element id of ids is partitioned between 
+#            the elements of params according to the partition_strategy. 
+#            In all strategies, if the id space does not evenly divide the 
+#            number of partitions, each of the first (max_id + 1) % len(params) 
+#            partitions will be assigned one more id."
+#            
+#            What does that mean?
+
+            sess.close()
+            
+
         with tf.variable_scope("lstm"):
             pass
             lstm_cell = tf.contrib.rnn.BasicLSTMCell(hidden_layer_size,
@@ -401,7 +572,7 @@ def main(_):
             assert((1, NUM_OF_CLASSES, BATCH_SIZE, hidden_layer_size) == \
                    np.asarray(states_example).shape)
 
-            print("\n\tDONE:", __name__)
+            print("\n\tDONE:", __file__, "\n")
     finally:
         tf.reset_default_graph()
 
