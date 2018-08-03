@@ -7,7 +7,6 @@ Created on 12Jul2018
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.python import debug as tf_debug
 
 elems_3x3x3x3 = np.asarray([
                         [
@@ -97,35 +96,35 @@ Data_2_0to2_0to2_0to2 = \
 with tf.Session() as sess:
 #    print("elems: \n", elems)
     sess.run(tf.global_variables_initializer())
-    print("tf.scan uses scan_row_sum_W_3x1() that does a " +
+    print("NOTE: tf.scan uses scan_row_sum_W_3x1() that does a " +
           "Matrix-Multiplication and Add")
     
     print("\nelems_3x3x3x3.shape: ", np.array(elems_3x3x3x3).shape)
     
-    print("\nsess.run(Data_0_0_0_0to2).shape): ", \
+    print("\n\"sess.run(Data_0_0_0_0to2).shape\"): ", \
           sess.run(Data_0_0_0_0to2).shape)
-    print("sess.run(Data_0_0_0_0to2)): ", \
+    print("\"sess.run(Data_0_0_0_0to2))\": ", \
           sess.run(Data_0_0_0_0to2))
     
-    print("\nsess.run(Data_0_0_0to2_0to2).shape): ", \
+    print("\n\"sess.run(Data_0_0_0to2_0to2).shape)\": ", \
           sess.run(Data_0_0_0to2_0to2).shape)
-    print("sess.run(Data_0_0_0to2_0to2)): \n", \
+    print("\"sess.run(Data_0_0_0to2_0to2))\": \n", \
           sess.run(Data_0_0_0to2_0to2))
     
-    print("\nsess.run(Data_0_0to2_0to2_0to2).shape): ", \
+    print("\n\"sess.run(Data_0_0to2_0to2_0to2).shape\"): ", \
           sess.run(Data_0_0to2_0to2_0to2).shape)
-    print("sess.run(Data_0_0to2_0to2_0to2)): \n", \
+    print("\"sess.run(Data_0_0to2_0to2_0to2))\": \n", \
           sess.run(Data_0_0to2_0to2_0to2))
-    print("sess.run(Data_0_0to2_0to2_0to2)[0]): \n", \
+    print("\"sess.run(Data_0_0to2_0to2_0to2)[0]\"): \n", \
           sess.run(Data_0_0to2_0to2_0to2)[0])
-    print("sess.run(Data_0_0to2_0to2_0to2)[1]): \n", \
+    print("\"sess.run(Data_0_0to2_0to2_0to2)[1]\"): \n", \
           sess.run(Data_0_0to2_0to2_0to2)[1])
-    print("sess.run(Data_0_0to2_0to2_0to2)[2]): \n", \
+    print("\"sess.run(Data_0_0to2_0to2_0to2)[2]\"): \n", \
           sess.run(Data_0_0to2_0to2_0to2)[2])
     
-    print("sess.run(Data_0to2_0to2_0to2_0to2)): \n", \
+    print("\"sess.run(Data_0to2_0to2_0to2_0to2)\": \n", \
           sess.run(Data_0to2_0to2_0to2_0to2))
-    print("sess.run(Data_1_0to2_0to2_0to2)): \n", \
+    print("\"sess.run(Data_1_0to2_0to2_0to2)\": \n", \
           sess.run(Data_1_0to2_0to2_0to2))
     
     print("******************************")
@@ -150,18 +149,18 @@ print("\nscanned Data_0_0to2_0to2_0to2: \n", scanned0)
 
 scanned = (sess.run(tf.scan(scan_row_sum_W_3x1, \
                     (Data_1_0to2_0to2_0to2))))
-print("\nscanned Data_0_0_0to2_0to2: \n", scanned)
+print("\n\"scanned Data_0_0_0to2_0to2\": \n", scanned)
 
 scanned0, scanned1, scanned2 = (sess.run(tf.scan(scan_row_sum_W_3x1_Multi, \
                     (Data_0_0to2_0to2_0to2,
                     Data_1_0to2_0to2_0to2,
                     Data_2_0to2_0to2_0to2))))
 print("******************************")
-print("\nscanned0 Data_0_0_0to2_0to2: \n", \
+print("\n\"scanned0 Data_0_0_0to2_0to2\": \n", \
                   scanned0)
-print("\nscanned1 Data_1_0to2_0to2_0to2: \n", \
+print("\n\"scanned1 Data_1_0to2_0to2_0to2\": \n", \
                   scanned1)
-print("\nscanned2 Data_2_0to2_0to2_0to2: \n", \
+print("\n\"scanned2 Data_2_0to2_0to2_0to2\": \n", \
                   scanned2)
 
 sess.close()

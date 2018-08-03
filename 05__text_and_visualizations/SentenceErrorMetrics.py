@@ -4,6 +4,9 @@
 Created on Fri Jul 27 18:55:34 2018
 
 @author: rm
+
+Module computes Error metrics by scanning the predicted & expected
+sentences word-by-word.
 """
 
 import numpy as np

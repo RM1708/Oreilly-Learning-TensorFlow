@@ -47,12 +47,12 @@ from tensorflow.python import debug as tf_debug
 
 WORDS_IN_A_SENTENCE = 6
 
-NUM_OF_LSTM_CELLS = 2               
+NUM_OF_LSTM_CELLS = 2              
 
 BATCH_SIZE = 128
 NUM_OF_TRAINING_RUNS = 500
 NUM_OF_TEST_RUNS = 5
-CHECK_EVERY_ITER = 10
+CHECK_EVERY_ITER = 100
 
 #There are just 10 words in the vocabulary, so why have a dimensionality of
 #64 for embedding?
@@ -371,7 +371,7 @@ def main(_):
             assert((BATCH_SIZE, hidden_layer_size) == \
                    states_example[0][1].h.shape)
 
-            print("\n\tDONE:", __name__)
+            print("\n\tDONE:", __file__, "\n")
     finally:
         tf.reset_default_graph()
 

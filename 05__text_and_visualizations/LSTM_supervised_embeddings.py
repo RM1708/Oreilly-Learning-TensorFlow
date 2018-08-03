@@ -379,6 +379,8 @@ def main(_):
                embeddings_3point[2].tolist())
         assert(embeddings_3point[2].tolist() == \
                embeddings_3point[8].tolist())
+        #
+        #Also see: /home/rm/Sandlot-TF-Misc/word_embeddings.py 
         #################################################################
         #Construct TensorFlow Graph
             

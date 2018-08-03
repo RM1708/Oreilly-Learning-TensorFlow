@@ -1,0 +1,39 @@
+MultiRNN_supervised_embeddings.py
+---------------------------------
+* embeddings table of the required shape, created in the operation 
+tf.Variable. The table is initialized to random_uniform values in the range(-1.0, 1.0)
+
+Projector-embeddings-Odd-Even-NOTA.py
+-------------------------------------
+* embeddings table as done above.
+
+* Factored out 
+    ** generation of data sentences
+    ** metrics computation using python
+
+* Note, import of constants
+
+LSTM_supervised_embeddings.py
+------------------------------
+* embeddings table as done above and by using the table embeddings_3point designed
+by me. Plenty of assertions of my understanding of embeddings
+
+* Question about modulo lookup mentioned in documentation
+
+* Has wrapper for running with tfdbg
+
+* Takes command line arguments
+
+LSTM_embeddings-Odd-Even-NOTA.py
+--------------------------------
+* embedding using Variable initialized as in MultiRNN_supervised_embeddings.py.
+
+* Daisy-chained tf.Print
+
+* Use of tf.py_func to call the existing function label_to_one_hot(). 
+This was to convert the predicted label to one-hot so that it could be compared 
+with true one-hot labels. See comments in code for reasons
+
+BasicRNNCell.py
+---------------
+*
