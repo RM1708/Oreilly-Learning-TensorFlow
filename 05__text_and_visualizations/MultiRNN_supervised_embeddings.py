@@ -360,7 +360,8 @@ def main(_):
             assert(1 == len(states_example))
             assert(NUM_OF_LSTM_CELLS == len(states_example[0]))
             assert(2 == len(states_example[0][0]))
-            
+            #For c & h see
+            #https://www.tensorflow.org/api_docs/python/tf/contrib/rnn/LSTMStateTuple
             assert((BATCH_SIZE, 2*hidden_layer_size) == \
                    states_example[0][0].c.shape)
             assert((BATCH_SIZE, 2*hidden_layer_size) == \

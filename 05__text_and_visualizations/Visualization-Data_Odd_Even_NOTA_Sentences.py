@@ -1,11 +1,22 @@
 
 # coding: utf-8
+'''
+ FROM: Simple Introduction to Tensorboard Embedding Visualisation
+ by Roland Meertens on April 19, 2017	
+     "Visualising embeddings is a powerful technique! 
+     It helps you understand what your algorithm learned, and if this is 
+     what you expected it to learn. 
+     Embedding visualisation is a standard feature in Tensorboard. 
+     Unfortunately many people on the internet seem to have some problems 
+     with getting a simple visualisation running. 
+     This is my attempt at creating the most simple code to get a simple 
+     visualisation of MNIST digits running."
+     
+The file EmbeddingVisualization.py in the folder
+    /home/rm/Sandlot-TensorFlow/SimpleIntroTFEmbeddingVisualization/
+has been modified so that it instead of MNIST data it takes the sentence data
 
-# Simple Introduction to Tensorboard Embedding Visualisation
-# by Roland Meertens on April 19, 2017	
-# Visualising embeddings is a powerful technique! 
-# It helps you understand what your algorithm learned, and if this is what you expected it to learn. Embedding visualisation is a standard feature in Tensorboard. Unfortunately many people on the internet seem to have some problems with getting a simple visualisation running. This is my attempt at creating the most simple code to get a simple visualisation of MNIST digits running.
-
+'''
 
 
 import tensorflow as tf
@@ -38,7 +49,7 @@ MIN_EVEN_NUM = 2
 
 #MNIST is not the input data
 #LOG_DIR = "/home/rm/Sandlot-TensorFlow/SimpleIntroTFEmbeddingVisualization/minimalsample"
-LOG_DIR = "/home/rm/logs/Embedding-Odd_Even_NOTA_Sentences"
+LOG_DIR = "/home/rm/logs/Visualization-Data-Odd_Even_NOTA_Sentences"
 NAME_TO_VISUALISE_VARIABLE = "WORD_EMBEDDING"
 TO_EMBED_COUNT = 500
 

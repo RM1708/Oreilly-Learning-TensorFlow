@@ -2,8 +2,14 @@ MultiRNN_supervised_embeddings.py
 ---------------------------------
 * embeddings table of the required shape, created in the operation 
 tf.Variable. The table is initialized to random_uniform values in the range(-1.0, 1.0)
+* LSTMStateTuple (c, h)
 
-Projector-embeddings-Odd-Even-NOTA.py
+
+Projector-embeddings-Odd-Even-NOTA.py 
+-------------------------------------
+renamed as
+----------
+Visualization-logits_Odd_Even_NOTA_Sentences.py
 -------------------------------------
 * embeddings table as done above.
 
@@ -13,12 +19,18 @@ Projector-embeddings-Odd-Even-NOTA.py
 
 * Note, import of constants
 
+Visualization-Data_Odd_Even_NOTA_Sentences.py
+---------------------------------------------
+* File was earlier named EmbeddingsVisualization_Data_Odd_Even_NOTA_Sentences.py
+* THIS is the one which produces the visualization files for Odd, Even, & NOTA sentences.
+* The files are in logdir=/home/rm/logs/Visualization-Data-Odd_Even_NOTA_Sentences/
+
 LSTM_supervised_embeddings.py
 ------------------------------
-* embeddings table as done above and by using the table embeddings_3point designed
+* embeddings table as done above and by using the table ***embeddings_3point*** designed
 by me. Plenty of assertions of my understanding of embeddings
 
-* Question about modulo lookup mentioned in documentation
+* QUESTION about modulo lookup mentioned in documentation
 
 * Has wrapper for running with tfdbg
 
@@ -28,7 +40,7 @@ LSTM_embeddings-Odd-Even-NOTA.py
 --------------------------------
 * embedding using Variable initialized as in MultiRNN_supervised_embeddings.py.
 
-* Daisy-chained tf.Print
+*** Daisy-chained tf.Print
 
 * Use of tf.py_func to call the existing function label_to_one_hot(). 
 This was to convert the predicted label to one-hot so that it could be compared 
@@ -36,4 +48,6 @@ with true one-hot labels. See comments in code for reasons
 
 BasicRNNCell.py
 ---------------
-*
+
+-------------------------------------------------------
+* 
