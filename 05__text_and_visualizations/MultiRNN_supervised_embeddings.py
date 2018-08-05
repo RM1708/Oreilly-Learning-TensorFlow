@@ -263,7 +263,8 @@ def main(_):
             #https://www.tensorflow.org/api_docs/python/tf/nn/dynamic_rnn
             #############################################################
             # create 2 LSTMCells
-            rnn_layers = [tf.nn.rnn_cell.LSTMCell(size) for size in [2 * hidden_layer_size, hidden_layer_size]]
+            rnn_layers = [tf.nn.rnn_cell.LSTMCell(size) for size in \
+                          [2 * hidden_layer_size, hidden_layer_size]]
             
             # create a RNN cell composed sequentially of a number of RNNCells
             multi_rnn_cell = tf.nn.rnn_cell.MultiRNNCell(rnn_layers)
@@ -349,29 +350,77 @@ def main(_):
             output_example = sess.run([outputs], feed_dict={_inputs: x_test,
                                                             _labels: y_test,
                                                             _sentence_lens: seqlen_test})
-#            states_example = sess.run([states[1]], feed_dict={_inputs: x_test,
-            states_example = sess.run([states], feed_dict={_inputs: x_test,
-                                                              _labels: y_test,
-                                                              _sentence_lens: seqlen_test})
-            
             assert((1,BATCH_SIZE, WORDS_IN_A_SENTENCE, hidden_layer_size) == \
                    np.asarray(output_example).shape)
             
-            assert(1 == len(states_example))
-            assert(NUM_OF_LSTM_CELLS == len(states_example[0]))
-            assert(2 == len(states_example[0][0]))
+            #################################################################
+            states_all = sess.run([states], feed_dict={_inputs: x_test,
+                                                              _labels: y_test,
+                                                              _sentence_lens: seqlen_test})
+            #The first dimension is owing to putting the tensor states as a list.
+            #If the [] are removed the asertion fails
+            assert(1 == len(states_all))
+            assert(NUM_OF_LSTM_CELLS == len(states_all[0]))
+            assert(2 == len(states_all[0][0]))
             #For c & h see
             #https://www.tensorflow.org/api_docs/python/tf/contrib/rnn/LSTMStateTuple
+            #and
+            #https://colah.github.io/posts/2015-08-Understanding-LSTMs/
+            #The latter has *** a lot *** of "gyan"
             assert((BATCH_SIZE, 2*hidden_layer_size) == \
-                   states_example[0][0].c.shape)
+                   states_all[0][0].c.shape)
             assert((BATCH_SIZE, 2*hidden_layer_size) == \
-                   states_example[0][0].h.shape)
+                   states_all[0][0].h.shape)
 
             assert((BATCH_SIZE, hidden_layer_size) == \
-                   states_example[0][1].c.shape)
+                   states_all[0][1].c.shape)
             assert((BATCH_SIZE, hidden_layer_size) == \
-                   states_example[0][1].h.shape)
+                   states_all[0][1].h.shape)
 
+            #################################################################
+            states_index1 = sess.run([states[1]], feed_dict={_inputs: x_test,
+                                                              _labels: y_test,
+                                                              _sentence_lens: seqlen_test})
+            
+            assert(1 == len(states_index1))
+            assert(NUM_OF_LSTM_CELLS == len(states_index1[0]))
+            assert((BATCH_SIZE, hidden_layer_size) == \
+                    (states_index1[0][0]).shape)
+            assert((BATCH_SIZE, hidden_layer_size) == \
+                    (states_index1[0][1]).shape)
+
+            #################################################################
+            #Now both together
+            states_all, states_index1 = sess.run([states, states[1]], feed_dict={_inputs: x_test,
+                                                              _labels: y_test,
+                                                              _sentence_lens: seqlen_test})
+
+            #NOTE how the outer most level of nesting has been removed.
+            #They have "lost" the first dimension.
+            #See above. If the [] are removed for single tensor sess.run(), then 
+            # the asserts will be the same
+            assert(NUM_OF_LSTM_CELLS == len(states_index1))
+            assert(BATCH_SIZE == len(states_index1[0]))
+            assert(BATCH_SIZE == len(states_index1[1]))
+            assert((BATCH_SIZE, hidden_layer_size) == \
+                    (states_index1[0]).shape)
+            assert((BATCH_SIZE, hidden_layer_size) == \
+                    (states_index1[1]).shape)
+
+            assert(NUM_OF_LSTM_CELLS == len(states_all))
+            assert(NUM_OF_LSTM_CELLS == len(states_all[0]))
+            assert((BATCH_SIZE, 2*hidden_layer_size) == \
+                   states_all[0].c.shape)
+            assert((BATCH_SIZE, 2*hidden_layer_size) == \
+                   states_all[0].h.shape)
+
+            assert((BATCH_SIZE, hidden_layer_size) == \
+                   states_all[1].c.shape)
+            assert((BATCH_SIZE, hidden_layer_size) == \
+                   states_all[1].h.shape)
+
+
+            
             print("\n\tDONE:", __file__, "\n")
     finally:
         tf.reset_default_graph()

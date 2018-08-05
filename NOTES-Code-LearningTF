@@ -2,7 +2,7 @@ MultiRNN_supervised_embeddings.py
 ---------------------------------
 * embeddings table of the required shape, created in the operation 
 tf.Variable. The table is initialized to random_uniform values in the range(-1.0, 1.0)
-* LSTMStateTuple (c, h)
+* LSTMStateTuple (c, h). Links documenting c & h added
 
 
 Projector-embeddings-Odd-Even-NOTA.py 
