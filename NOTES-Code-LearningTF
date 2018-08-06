@@ -23,9 +23,12 @@ Visualization-logits_Odd_Even_NOTA_Sentences.py
 Visualization-Data_Odd_Even_NOTA_Sentences.py
 ---------------------------------------------
 * File was earlier named EmbeddingsVisualization_Data_Odd_Even_NOTA_Sentences.py
+
 * THIS is the one which produces the visualization files for Odd, Even, & NOTA sentences.
+
 * The files are in logdir=/home/rm/logs/Visualization-Data-Odd_Even_NOTA_Sentences/
-* Now can embed two variables. The projector makes available both embeddings for view.
+
+* *** Now can embed two variables ***. The projector makes available both embeddings for view.
 
 LSTM_supervised_embeddings.py
 ------------------------------
@@ -42,11 +45,15 @@ LSTM_embeddings-Odd-Even-NOTA.py
 --------------------------------
 * embedding using Variable initialized as in MultiRNN_supervised_embeddings.py.
 
-*** Daisy-chained tf.Print
+* *** Daisy-chained tf.Print ***
 
 * Use of tf.py_func to call the existing function label_to_one_hot(). 
 This was to convert the predicted label to one-hot so that it could be compared 
-with true one-hot labels. See comments in code for reasons
+with true one-hot labels. See comments in code for reasons.
+
+* Factored out (as in Visualization-logits_Odd_Even_NOTA_Sentences.py)
+    ** generation of data sentences
+    ** metrics computation using python
 
 BasicRNNCell.py
 ---------------
