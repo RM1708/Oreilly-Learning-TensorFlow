@@ -3,6 +3,11 @@
 """
 Created on Fri Jul 27 10:46:26 2018
 
+This module generates sentence data that contains Odd, Even & NOTA sentences.
+
+TODO: 
+-----
+Modify this to generate sentence data for just Odd & Even sentences.
 @author: rm
 """
 import numpy as np

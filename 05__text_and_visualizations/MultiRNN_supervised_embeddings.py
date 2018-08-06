@@ -44,7 +44,6 @@ import argparse
 import sys
 from tensorflow.python import debug as tf_debug
 
-
 WORDS_IN_A_SENTENCE = 6
 
 NUM_OF_LSTM_CELLS = 2              
@@ -311,10 +310,13 @@ def main(_):
                                                           ui_type=FLAGS.ui_type)
         
             x_batch, y_batch, seqlen_batch = get_sentence_batch(BATCH_SIZE,
-                                                                train_x, train_y,
+                                                                train_x, \
+                                                                train_y, \
                                                                 train_sentence_lens)
             
-            word_embeddings, embeddings= sess.run([embed, embeddings], feed_dict={_inputs: x_batch, _labels: y_batch,
+            word_embeddings, embeddings= sess.run([embed, embeddings], \
+                                                  feed_dict={_inputs: x_batch, \
+                                                             _labels: y_batch,
                                             _sentence_lens: seqlen_batch})
             assert((BATCH_SIZE, \
                     WORDS_IN_A_SENTENCE) == np.asarray(x_batch).shape)

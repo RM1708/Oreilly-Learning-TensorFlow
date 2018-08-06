@@ -14,7 +14,22 @@
      
 The file EmbeddingVisualization.py in the folder
     /home/rm/Sandlot-TensorFlow/SimpleIntroTFEmbeddingVisualization/
-has been modified so that it instead of MNIST data it takes the sentence data
+has been modified so that it instead of MNIST data it takes the sentence data.
+
+Comments in the original file have been retained for reference.
+Code from the original, that is of no use here, has been commented
+out.
+
+ONJECTIVE
+---------
+As in the original file, the objective here is just to visualize the input data.
+Hence, 
+    1. *** no model *** is created. Hence,
+        1. *** no placeholders ***.
+        2. *** no training ***
+        3. *** no performance checking ***
+However, a graph *** is required ***. The nodes of the graph are required to:
+    1.
 
 '''
 
@@ -59,6 +74,7 @@ TO_EMBED_COUNT = 500
 #path_for_mnist_sprites =  os.path.join(LOG_DIR,'mnistdigits.png')
 #path_for_mnist_metadata =  os.path.join(LOG_DIR,'metadata.tsv')
 path_for_sentences_metadata = os.path.join(LOG_DIR,'metadata.tsv')
+path_for_sentences_metadata_0 = os.path.join(LOG_DIR,'metadata_0.tsv')
 #
 ################################################################
 #NOT PROCESSING IMAGES. SPRITES NOT RELEVANT
@@ -128,13 +144,18 @@ number_of_distinct_words_found = \
 
 #embedding_var = tf.Variable(batch_xs, name=NAME_TO_VISUALISE_VARIABLE)
 batch_size = 500
-x_batch, y_batch, seqlen_batch = \
+x_batch, y_batch, _ = \
                             get_sentence_batch(batch_size, \
                                                 train_x, 
                                                 train_y,
                                                 train_sentence_lens, \
                                                 WORDS_IN_A_SENTENCE)
+
+#The variable for the 1st embedding
 embedding_var = tf.Variable(x_batch, name=NAME_TO_VISUALISE_VARIABLE)
+#The variable for the 2nd embedding. Its the same data as for the 1st embedding
+embedding_var_0 = tf.Variable(x_batch, name=NAME_TO_VISUALISE_VARIABLE+"_0")
+
 summary_writer = tf.summary.FileWriter(LOG_DIR)
 
 
@@ -148,11 +169,18 @@ summary_writer = tf.summary.FileWriter(LOG_DIR)
 # We will create the sprites later!
 
 config = projector.ProjectorConfig()
+
+#The 1st Embedding
 embedding = config.embeddings.add()
 embedding.tensor_name = embedding_var.name
-
 # Specify where you find the metadata
 embedding.metadata_path = path_for_sentences_metadata #'metadata.tsv'
+
+#Now the 2nd embedding. The data is the same
+embedding = config.embeddings.add()
+embedding.tensor_name = embedding_var_0.name
+# Specify where you find the metadata
+embedding.metadata_path = path_for_sentences_metadata_0 #'metadata.tsv'
 
 # Specify where you find the sprite (we will create this later)
 #embedding.sprite.image_path = path_for_mnist_sprites #'mnistdigits.png'
@@ -219,14 +247,26 @@ with tf.Session() as sess:
     # 
     # This code writes our data to the metadata file.
     # 
-    with open(path_for_sentences_metadata,'w') as f:
-        f.write("Index\tLabel\n")
+#Not required to be in the session variable space
+#Metadata for the 1st variable
+with open(path_for_sentences_metadata,'w') as f:
+    f.write("Index\tLabel\n")
 #        y_batch_list = y_batch.tolist()
-        index = 0
+    index = 0
 #        for index,label in enumerate(train_y_list):
-        for label in (y_batch):
-            f.write("%d\t%d\n" % (index, np.argmax(label)))
-            index += 1
+    for label in (y_batch):
+        f.write("%d\t%d\n" % (index, np.argmax(label)))
+        index += 1
+
+#Now metadata for the 2nd variable
+with open(path_for_sentences_metadata_0,'w') as f:
+    f.write("Index\tLabel\n")
+#        y_batch_list = y_batch.tolist()
+    index = 0
+#        for index,label in enumerate(train_y_list):
+    for label in (y_batch):
+        f.write("%d\t%d\n" % (index, np.argmax(label)))
+        index += 1
             
 ###########################################################################    
 # ### How to run

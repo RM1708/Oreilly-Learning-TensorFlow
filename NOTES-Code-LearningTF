@@ -1,5 +1,6 @@
 MultiRNN_supervised_embeddings.py
 ---------------------------------
+* Instrumented for tfdbg
 * embeddings table of the required shape, created in the operation 
 tf.Variable. The table is initialized to random_uniform values in the range(-1.0, 1.0)
 * LSTMStateTuple (c, h). Links documenting c & h added
@@ -24,6 +25,7 @@ Visualization-Data_Odd_Even_NOTA_Sentences.py
 * File was earlier named EmbeddingsVisualization_Data_Odd_Even_NOTA_Sentences.py
 * THIS is the one which produces the visualization files for Odd, Even, & NOTA sentences.
 * The files are in logdir=/home/rm/logs/Visualization-Data-Odd_Even_NOTA_Sentences/
+* Now can embed two variables. The projector makes available both embeddings for view.
 
 LSTM_supervised_embeddings.py
 ------------------------------
