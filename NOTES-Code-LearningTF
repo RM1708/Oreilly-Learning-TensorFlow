@@ -1,8 +1,10 @@
 MultiRNN_supervised_embeddings.py
 ---------------------------------
 * Instrumented for tfdbg
+
 * embeddings table of the required shape, created in the operation 
 tf.Variable. The table is initialized to random_uniform values in the range(-1.0, 1.0)
+
 * LSTMStateTuple (c, h). Links documenting c & h added
 
 
@@ -19,6 +21,8 @@ Visualization-logits_Odd_Even_NOTA_Sentences.py
     ** metrics computation using python
 
 * Note, import of constants
+
+* Projector display now for both input data and output logits
 
 Visualization-Data_Odd_Even_NOTA_Sentences.py
 ---------------------------------------------

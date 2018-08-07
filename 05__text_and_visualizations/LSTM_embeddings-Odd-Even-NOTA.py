@@ -339,7 +339,7 @@ def main(_):
 #            print("\nseqlen_test[1]:{}, expected between {} and {}".format(seqlen_test[1], \
 #                  MIN_LEN_OF_UNPADDED_SENTENCE, MAX_LEN_OF_UNPADDED_SENTENCE))
 
-            print("\n\tDONE:", __name__)
+            print("\n\tDONE:", __file__)
     finally:
         tf.reset_default_graph()
 
