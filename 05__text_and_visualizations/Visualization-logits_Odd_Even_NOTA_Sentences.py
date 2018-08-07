@@ -68,6 +68,21 @@ def main(_):
                                     WORDS_IN_A_SENTENCE, \
                                     digit_to_word_map)
         #################################################################
+        random_nums = (np.random.uniform(-1, 1, embedding_space_dimensionality))
+        embeddings_3point = \
+            np.asarray([
+                random_nums *  0.0,
+                random_nums * -1.0,
+                random_nums * +1.0,
+                random_nums * -1.0,
+                random_nums * +1.0,
+                random_nums * -1.0,
+                random_nums * +1.0,
+                random_nums * -1.0,
+                random_nums * +1.0,
+                random_nums * -1.0
+                    ])
+        #################################################################
         #CONSTRUCT TensorFlow Graph
             
         _inputs = tf.placeholder(tf.int32, shape=[BATCH_SIZE, times_steps])
@@ -82,10 +97,18 @@ def main(_):
             #    assert((WORDS_IN_VOCAB,  \
             #        embedding_space_dimensionality) == embeddings.shape)
 
-            embeddings = tf.Variable(
-                        tf.random_uniform([number_of_distinct_words_found,
-                                           embedding_space_dimensionality],
-                                          -1.0, 1.0), name='embedding')
+            USE_3point_MAP = True 
+            
+            if(False == USE_3point_MAP):
+                embeddings = tf.Variable(
+                    tf.random_uniform([number_of_distinct_words_found,
+                                       embedding_space_dimensionality],
+                                      -1.0, 1.0), name='embedding')
+            else:
+                embeddings =tf.Variable(embeddings_3point, \
+                                        dtype=tf.float32, \
+                                        name='embedding')
+
             # Map from input space to embedding.
             # Each input is a vector having dimensionality equal to
             # time_steps.
