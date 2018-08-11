@@ -1,3 +1,7 @@
+.gitignore
+----------
+* REUSE
+
 MultiRNN_supervised_embeddings.py
 ---------------------------------
 * Instrumented for tfdbg
@@ -62,5 +66,6 @@ with true one-hot labels. See comments in code for reasons.
 BasicRNNCell.py
 ---------------
 
+/home/rm/Code-LearningTF/06__word_embeddings_and_rnns/word2vec.py
 -------------------------------------------------------
-* 
+* Pur
