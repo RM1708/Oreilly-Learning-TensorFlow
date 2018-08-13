@@ -18,8 +18,24 @@ Created on Thu Dec 29 00:39:23 2016
 
 @TODO
 -----
-    1. Use both left and right context words.
-    2. Make WORDS_PER_PHRASE > 3. Make pos of TARGET_WORD selectable.
+    1. Right context words not relevant. Only the left context is valid for 
+    predicting the TARGET_WORD. So why generte it at all? 
+        From: (Kindle Locations 3496-3500). O'Reilly Media. Kindle Edition. 
+        "...The major advantage of this representation is its ability to 
+        capture the context of words from both directions, which enables 
+        richer understanding of natural language and the underlying semantics 
+        in text. In practice, in complex tasks, it often leads to improved 
+        accuracy.   For example, in part-of-speech (POS) tagging, we want to 
+        output a predicted tag for each word in a sentence 
+        (such as “noun,” “adjective,” etc.). In order to predict a POS tag 
+        for a given word, it is useful to have information on its surrounding 
+        words, from both directions."
+
+    2. Make WORDS_PER_PHRASE > 3. Make TARGET_WORD slide from left to right.
+    3. Check processing time reduces for lower NUM_RANDOM_SAMPLES_PER_BATCH.
+    4. For each word that appears in the left context, 
+        1. what is the histogram of the TARGET WORDS?
+        2. Histogram of predicted words. (Where are the predictions?)
 """
 import os
 import math
@@ -30,7 +46,6 @@ from tensorflow.contrib.tensorboard.plugins import projector
 EXPLORE = False     #Switch
 
 EMBEDDING_DIMENSIONALITY = 5
-NUM_FALSE_POSITIVES = 8
 LOG_DIR = "/home/rm/logs/word2vec_intro"
 
 
@@ -44,11 +59,26 @@ if(EXPLORE):
     BATCH_SIZE = 8
     TRAINING_ITERS = 20
     CHECK_AT = 1
+    NUM_RANDOM_SAMPLES_PER_BATCH = BATCH_SIZE
 else:
     NUM_OF_PHRASES = 20000
     BATCH_SIZE = 64
-    TRAINING_ITERS = 5000
+    TRAINING_ITERS = 3000
     CHECK_AT = 100
+    NUM_RANDOM_SAMPLES_PER_BATCH =  9
+    '''
+    NUM_RANDOM_SAMPLES_PER_BATCH values 1 thru 9, Is OK.
+    Min value of NUM_RANDOM_SAMPLES_PER_BATCH is 1.
+    
+    Lower the NUM_RANDOM_SAMPLES_PER_BATCH, shorter the processing time. CHECK
+    
+    NUM_RANDOM_SAMPLES_PER_BATCH value of 10 throws an error 
+    InvalidArgumentError ...: Sampler's range is too small.
+	 [[Node: nce_loss/LogUniformCandidateSampler = 
+         LogUniformCandidateSampler[num_sampled=10, 
+         num_true=1, range_max=9, seed=0, seed2=0, 
+         unique=true, ...
+     '''
     
 WORDS_PER_PHRASE = 3
 CONTEXT_LEFT = -1; CONTEXT_RIGHT = +1; TARGET_WORD = 0
@@ -185,17 +215,28 @@ loss = tf.reduce_mean(
                                  biases=nce_biases, \
                                  inputs=embed, \
                                  labels=tf.cast(train_labels, tf.int64),
-                                 num_sampled=NUM_FALSE_POSITIVES, \
+                                 num_sampled=NUM_RANDOM_SAMPLES_PER_BATCH, \
                                  num_classes=unique_words_found))
 tf.summary.scalar("NCE_loss", loss)
 
 # Learning rate decay
-global_step = tf.Variable(0, trainable=False)
+#global_step = tf.Variable(0, trainable=False)
+#Since global_step is not going to change, it can be set as below
+global_step = 0 
+#From:
+#    https://www.tensorflow.org/api_docs/python/tf/train/exponential_decay
+#decayed_learning_rate = learning_rate *
+#                        decay_rate ^ (global_step / decay_steps)
+
 learningRate = tf.train.exponential_decay(learning_rate=0.1,
                                           global_step=global_step,
-                                          decay_steps=1000,
+                                          decay_steps=100,  #1000,
                                           decay_rate=0.95,
+                                          #imaterial if staircase is set to False.
+                                          #See comments above
                                           staircase=True)
+#Ref: https://www.tensorflow.org/api_docs/python/tf/train/
+#GradientDescentOptimizer#minimize
 train_step = tf.train.GradientDescentOptimizer(learningRate).minimize(loss)
 merged = tf.summary.merge_all()
 

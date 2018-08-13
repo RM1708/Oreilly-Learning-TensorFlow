@@ -68,4 +68,13 @@ BasicRNNCell.py
 
 /home/rm/Code-LearningTF/06__word_embeddings_and_rnns/word2vec.py
 -------------------------------------------------------
-* Pur
+
+06__word_embeddings_and_rnns/CompareEmbeddings-PreTrained-vs-Generated.py
+-------------------------------------------------------------------------
+* Use of python's zipfile module to process .zip files.
+* asserts with iteration using list comprehension. (For comprehension
+Ref Comprehending Comprehensions in "Python Tricks: A Buffet of Awesome Python 
+Features (p. 212)". Kindle edn).
+* Division of tensor object by another.
+* Extended slicing
+* Repeatable random numbers using seed.
