@@ -235,6 +235,7 @@ accuracy = (tf.reduce_mean(tf.cast(correct_prediction,
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
+    print("\nPRE_TRAINED: ", PRE_TRAINED)
     if(PRE_TRAINED):
         sess.run(embedding_init,
                  feed_dict={embedding_placeholder: embedding_matrix})

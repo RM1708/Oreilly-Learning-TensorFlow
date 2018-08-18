@@ -1,3 +1,10 @@
+*/MNIST_tflearn_board/*
+*/MNIST_tflearn_checkpoints/*
+*/imdb.pkl
+*/mnist/*
+*/models/*
+
+
 #Some general ignores
 # -------------------
 */logs/*
