@@ -1,3 +1,7 @@
+'''
+See
+The Model; "Learning TensorFlow: A Guide to Building Deep Learning Systems" (Kindle Location 1440). O'Reilly Media. Kindle Edition. 
+'''
 import tensorflow as tf
 
 

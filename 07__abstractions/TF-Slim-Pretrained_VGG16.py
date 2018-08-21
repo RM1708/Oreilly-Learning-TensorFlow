@@ -6,7 +6,7 @@
 
 from tensorflow.contrib import slim
 import sys
-from datasets import dataset_utils
+#from datasets import dataset_utils
 import tensorflow as tf
 #import urllib2
 import urllib
@@ -20,16 +20,41 @@ target_dir = '/home/rm/tmp/TF-Slim-PretrainedVGG16/checkpoints/'
 
 url = ("http://54.68.5.226/car.jpg")
 
-#im_as_string = urllib2.urlopen(url).read()  
-im_as_string = urllib.request.urlopen(url).read()  
-im = tf.image.decode_jpeg(im_as_string, channels=3)
+IMAGE_SIZE = vgg.vgg_16.default_image_size
 
-image_size = vgg.vgg_16.default_image_size
-
-processed_im = vgg_preprocessing.preprocess_image(im,
-                                                         image_size,
-                                                         image_size,
-                                                         is_training=False)
+IMAGE_FROM_COMPUTER = True
+if(not IMAGE_FROM_COMPUTER):
+    #im_as_string = urllib2.urlopen(url).read()  
+    im_as_string = urllib.request.urlopen(url).read()  
+    im = tf.image.decode_jpeg(im_as_string, channels=3)
+    processed_im = vgg_preprocessing.preprocess_image(im,
+                                                     IMAGE_SIZE,
+                                                     IMAGE_SIZE,
+                                                     is_training=False)
+else:
+    #Hope, Tom; Resheff, Yehezkel S.; Lieder, Itay. 
+    #Learning TensorFlow: A Guide to Building Deep Learning Systems 
+    #(Kindle Locations 4920-4926). O'Reilly Media. Kindle Edition. 
+    list_of_files = tf.train.match_filenames_once("/home/rm/Downloads/Images/Car.jpg") 
+    file_queue = tf.train.string_input_producer(list_of_files) 
+    #https://www.tensorflow.org/api_docs/python/tf/WholeFileReader#read
+#    image_reader = tf.WholeFileReader() 
+#    key_value_pair = image_reader.read(file_queue) 
+#    filename_at_head_of_Q = key_value_pair[0]
+#    content_of_file_at_head_of_Q = key_value_pair[1]
+#    im_ = tf.image.decode_jpeg(content_of_file_at_head_of_Q, channels=0)
+    from PIL import Image
+#    im_ = Image.open('/home/rm/tmp/Images/Car.jpg')
+#    im_ = Image.open('/home/rm/tmp/Images/Car-BMW-Orig.jpeg')
+#    im_ = Image.open('/home/rm/tmp/Images/cat0.jpg')
+    im_ = Image.open(\
+        '/home/rm/Sandlot-TensorFlow/tensorflow_input_image_by_tfrecord/src/steak/100135.jpg')
+    
+    processed_im = vgg_preprocessing.preprocess_image(im_,
+                                                     IMAGE_SIZE,
+                                                     IMAGE_SIZE,
+                                                     is_training=False)
+    
 
 processed_images  = tf.expand_dims(processed_im, 0)
 
@@ -55,7 +80,7 @@ load_vars = slim.assign_from_checkpoint_fn(
 
 
 from datasets import imagenet
-imagenet.create_readable_names_for_imagenet_labels()
+#imagenet.create_readable_names_for_imagenet_labels()
 
 
 # ### Infer class and probability
