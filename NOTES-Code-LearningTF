@@ -78,3 +78,31 @@ Features (p. 212)". Kindle edn).
 * Division of tensor object by another.
 * Extended slicing
 * Repeatable random numbers using seed.
+
+/home/../07__abstractions/04._Contrib_learn-FeatureColumns-Estimator-Locn_4081.py
+--------------------------------------------------------------------------------
+* Abstraction: Linear Regressor. No need for user to build a graph and invoke a 
+session
+* 
+* Select items from a list of N items, using the indices of a second list. 
+    ** The 2nd list should have boolean values. 
+    ** The length of both lists should be equal.
+    ** The indices at which the 2nd list has values of True, are indices
+    that are used to retrieve items from the 1st list.
+ * All items in a list can be checked if any of them meet any given condition.
+ This is done in a single statement - not in a loop. The result is a boolean
+ list of the same length. Its elements have a value of True at the indices for which
+ the condition was met.
+ * Histogram & X-Y plot  
+
+/home/rm/Code-LearningTF/07__abstractions/06._TFLearn-CNN-Locn_4327.ipynb
+-------------------------------------------------------------------------
+* Abstraction: 
+        "The tflearn.DNN() function ...
+        — it’s the DNN model wrapper with which we instantiate the model 
+        and to which we pass our constructed network."
+* Creates "instrument-panel" type display of progress see plain text listing of 
+the file (saved with output) for how it is done. Running the .py file does not create an 
+"instrument-pane". Rather it appears as list of prints of "screen-shots" of the
+instrument-panel
+

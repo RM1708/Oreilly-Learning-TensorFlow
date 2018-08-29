@@ -85,7 +85,8 @@ hist_plot = axarr[PLOT_0]
 hist_plot.set_ylim([0,260])
 hist_plot.set_xlim([1.38,2.05])
 NO_OF_BINS = 50
-COLOR_BRIGHTNESS = 0.5
+COLOR_BRIGHTNESS = 0.5 #0.1 gives really faded colors
+
 #Position the text for the histogram
 hist_plot.text(1.42,150,'Goblins')
 hist_plot.text(1.63,210,'Humans')
