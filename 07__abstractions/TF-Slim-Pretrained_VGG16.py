@@ -35,8 +35,8 @@ else:
     #Hope, Tom; Resheff, Yehezkel S.; Lieder, Itay. 
     #Learning TensorFlow: A Guide to Building Deep Learning Systems 
     #(Kindle Locations 4920-4926). O'Reilly Media. Kindle Edition. 
-    list_of_files = tf.train.match_filenames_once("/home/rm/Downloads/Images/Car.jpg") 
-    file_queue = tf.train.string_input_producer(list_of_files) 
+#    list_of_files = tf.train.match_filenames_once("/home/rm/Downloads/Images/Car.jpg") 
+#    file_queue = tf.train.string_input_producer(list_of_files) 
     #https://www.tensorflow.org/api_docs/python/tf/WholeFileReader#read
 #    image_reader = tf.WholeFileReader() 
 #    key_value_pair = image_reader.read(file_queue) 

@@ -106,3 +106,16 @@ the file (saved with output) for how it is done. Running the .py file does not c
 "instrument-pane". Rather it appears as list of prints of "screen-shots" of the
 instrument-panel
 
+* Test accuracy = 0.9866 on MNIST
+
+../Code-LearningTF/07__abstractions/TF-Slim-Pretrained_VGG16.py
+---------------------------------------------------------------
+* Example of using zip for printing out a pair of lists
+* Creates readable names for imagenet labels.
+
+Command Line args
+-----------------
+    Code-LearningTF/05__text_and_visualizations/MultiRNN_supervised_embeddings.py:457:    parser = argparse.ArgumentParser()
+    Code-LearningTF/05__text_and_visualizations/Visualization-logits_Odd_Even_NOTA_Sentences.py:452:    parser = argparse.ArgumentParser()
+    Code-LearningTF/05__text_and_visualizations/LSTM_supervised_embeddings.py:582:    parser = argparse.ArgumentParser()
+    Code-LearningTF/05__text_and_visualizations/LSTM_embeddings-Odd-Even-NOTA.py:347:    parser = argparse.ArgumentParser()
